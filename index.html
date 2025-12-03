@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Analyst Alchemist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'cp-black': 'var(--cp-black)',
+              'cp-dark': 'var(--cp-dark)',
+              'cp-dim': 'var(--cp-dim)',
+              'cp-deep': 'var(--cp-deep)',
+              'cp-gray': 'var(--cp-gray)',
+              'cp-text': 'var(--cp-text)',
+              'cp-text-muted': 'var(--cp-text-muted)',
+              'cp-yellow': 'var(--cp-yellow)', // Antique Gold
+              'cp-cyan': 'var(--cp-cyan)',
+              'cp-red': 'var(--cp-red)',
+              'cp-border': 'var(--cp-border)',
+            },
+            fontFamily: {
+              sans: ['Inter', 'Noto Sans SC', 'sans-serif'],
+              serif: ['Inter', 'Noto Sans SC', 'sans-serif'], // Force standard font even for serif class
+              mono: ['JetBrains Mono', 'monospace'],
+              // Map artistic names to standard fonts to override previous usage
+              oxanium: ['Inter', 'Noto Sans SC', 'sans-serif'], 
+              display: ['Inter', 'Noto Sans SC', 'sans-serif'],
+            },
+            animation: {
+              'pulse-fast': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'float': 'float 6s ease-in-out infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-5px)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        /* Artistic / Gallery Palette - Refined Antique Gold */
+        --cp-black: #0F0F11;  
+        --cp-dark: #141416;   
+        --cp-dim: #1C1C1E;    
+        --cp-deep: #000000;
+        --cp-gray: #52525B;   
+        
+        /* Subtle Borders */
+        --cp-border: rgba(255, 255, 255, 0.08); 
+        
+        --cp-text: #E4E4E7;      
+        --cp-text-muted: #A1A1AA; 
+        
+        /* Textured Dark Gold */
+        --cp-yellow: #C5A059; 
+        
+        --cp-cyan: #78909C;   
+        --cp-red: #A94442;    
+      }
+      
+      html.light-mode {
+        --cp-black: #F5F5F0; 
+        --cp-dark: #EAEAE5;
+        --cp-dim: #E0E0DB;
+        --cp-deep: #D6D6D0;
+        --cp-gray: #A1A19D;
+        --cp-border: rgba(0, 0, 0, 0.05);
+        --cp-text: #18181B;   
+        --cp-text-muted: #52525B;
+        --cp-yellow: #B8860B; 
+        --cp-cyan: #546E7A;   
+        --cp-red: #8B0000;    
+      }
+
+      body {
+        font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        background-color: var(--cp-black);
+        color: var(--cp-text);
+        overflow: hidden;
+        font-size: 14px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        height: 100vh;
+        width: 100vw;
+        transition: background-color 0.5s ease, color 0.5s ease;
+      }
+
+      /* Noise Texture */
+      .texture-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0.035;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+
+      * {
+        border-radius: 0 !important;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(197, 160, 89, 0.2);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--cp-yellow);
+      }
+
+      /* Text Utilities */
+      .text-glow {
+        text-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
+      }
+
+      /* Button Styles */
+      .btn-gold {
+        background: linear-gradient(135deg, var(--cp-yellow), #B08D55);
+        color: #000;
+        border: none;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.3s ease;
+      }
+      .btn-gold:hover {
+        background: linear-gradient(135deg, #DBC183, #C5A059);
+        box-shadow: 0 4px 20px rgba(197, 160, 89, 0.25);
+        transform: translateY(-1px);
+      }
+      
+      .btn-outline {
+        background: transparent;
+        border: 1px solid var(--cp-border);
+        color: var(--cp-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        transition: all 0.3s ease;
+      }
+      .btn-outline:hover {
+        border-color: var(--cp-yellow);
+        color: var(--cp-text);
+        background: rgba(255, 255, 255, 0.02);
+      }
+      
+      /* Tabs - Bottom Border Only */
+      .tab-item {
+        position: relative;
+        color: var(--cp-text-muted);
+        transition: color 0.3s ease;
+      }
+      .tab-item.active {
+        color: var(--cp-text);
+        font-weight: 700;
+      }
+      .tab-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--cp-yellow);
+      }
+
+      /* Animations */
+      @keyframes modalIn {
+        from { opacity: 0; transform: scale(0.98) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      .modal-animate {
+        animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      
+      /* Hover Effects for Cards */
+      .hover-card {
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+      }
+      .hover-card:hover {
+        background-color: rgba(255, 255, 255, 0.02);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "echarts": "https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.esm.min.js",
+    "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div class="texture-overlay"></div>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
