@@ -1,4 +1,3 @@
-
 export enum AgentCapability {
   AUTO_TRADING = 'AUTO_TRADING',
   STRATEGY_PICKING = 'STRATEGY_PICKING',
@@ -26,18 +25,18 @@ export interface Achievement {
 
 export interface AgentStats {
   intelligence: number; // Renamed to Strategy Capability in UI
-  speed: number;        // Renamed to Execution Efficiency in UI
-  risk: number;         // Renamed to Stability/Robustness in UI
+  speed: number; // Renamed to Execution Efficiency in UI
+  risk: number; // Renamed to Stability/Robustness in UI
 }
 
 // New: Module Definition for Team Assembly
 export interface AgentModule {
-    id: string;
-    type: 'CORE' | 'EXECUTION' | 'RISK';
-    name: string;
-    description: string;
-    statsMod: Partial<AgentStats>;
-    icon: string;
+  id: string;
+  type: 'CORE' | 'EXECUTION' | 'RISK';
+  name: string;
+  description: string;
+  statsMod: Partial<AgentStats>;
+  icon: string;
 }
 
 export interface Agent {
@@ -58,7 +57,7 @@ export interface RankingItem {
   id: number | string;
   rank: number;
   name: string;
-  class: string; 
+  class: string;
   profit: string;
   rawProfit: number; // Numeric value for sorting
   status: '在线' | '离线' | '训练中';
@@ -85,35 +84,38 @@ export interface AppNotification {
   timestamp: number;
 }
 
-export const AGENT_CAPABILITY_DETAILS: Record<AgentCapability, { label: string; icon: string; desc: string; role: string }> = {
-  [AgentCapability.AUTO_TRADING]: { 
-    label: '自动交易', 
-    icon: 'activity', 
-    desc: '低买高卖，自动赚钱',
-    role: '交易员'
+export const AGENT_CAPABILITY_DETAILS: Record<
+  AgentCapability,
+  { icon: string; labelKey: string; descKey: string; roleKey: string }
+> = {
+  [AgentCapability.AUTO_TRADING]: {
+    icon: 'activity',
+    labelKey: 'capabilities.AUTO_TRADING.label',
+    descKey: 'capabilities.AUTO_TRADING.desc',
+    roleKey: 'capabilities.AUTO_TRADING.role'
   },
-  [AgentCapability.STRATEGY_PICKING]: { 
-    label: '智能选股', 
-    icon: 'crosshair', 
-    desc: '挖掘潜力牛股',
-    role: '策略师'
+  [AgentCapability.STRATEGY_PICKING]: {
+    icon: 'crosshair',
+    labelKey: 'capabilities.STRATEGY_PICKING.label',
+    descKey: 'capabilities.STRATEGY_PICKING.desc',
+    roleKey: 'capabilities.STRATEGY_PICKING.role'
   },
-  [AgentCapability.STOCK_ANALYSIS]: { 
-    label: '个股诊断', 
-    icon: 'search', 
-    desc: '分析股票好坏',
-    role: '分析师'
+  [AgentCapability.STOCK_ANALYSIS]: {
+    icon: 'search',
+    labelKey: 'capabilities.STOCK_ANALYSIS.label',
+    descKey: 'capabilities.STOCK_ANALYSIS.desc',
+    roleKey: 'capabilities.STOCK_ANALYSIS.role'
   },
-  [AgentCapability.BACKTESTING]: { 
-    label: '历史验证', 
-    icon: 'rewind', 
-    desc: '用历史数据测试',
-    role: '精算师'
+  [AgentCapability.BACKTESTING]: {
+    icon: 'rewind',
+    labelKey: 'capabilities.BACKTESTING.label',
+    descKey: 'capabilities.BACKTESTING.desc',
+    roleKey: 'capabilities.BACKTESTING.role'
   },
-  [AgentCapability.ARTICLE_WRITING]: { 
-    label: '生成报告', 
-    icon: 'pen-tool', 
-    desc: '自动写复盘总结',
-    role: '研究员'
+  [AgentCapability.ARTICLE_WRITING]: {
+    icon: 'pen-tool',
+    labelKey: 'capabilities.ARTICLE_WRITING.label',
+    descKey: 'capabilities.ARTICLE_WRITING.desc',
+    roleKey: 'capabilities.ARTICLE_WRITING.role'
   }
 };
