@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description: 'Connect to the financial intelligence matrix. Deploy autonomous AI agents, backtest strategies in real-time, and compete for glory in the global algorithmic ladder.',
 };
 
-// Fetch top performers server-side for SSR
+// Fetch top performers server-side for SSR with revalidation
 async function getTopPerformers() {
   try {
     // Use absolute URL for server-side fetch
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const res = await fetch(`${baseUrl}/api/performers`, { 
-      cache: 'no-store'
+      next: { revalidate: 60 } // Revalidate every 60 seconds for ISR
     });
     if (!res.ok) {
       return [

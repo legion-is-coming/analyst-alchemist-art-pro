@@ -10,6 +10,22 @@ import type {
   AgentCapability
 } from '@/types';
 
+// Storage key constants for consistency
+const STORAGE_KEYS = {
+  USER_SESSION: 'matrix_user_session',
+  AGENT_DATA: 'matrix_agent_data',
+  LANGUAGE: 'matrix_language',
+} as const;
+
+// Utility function for generating unique IDs
+function generateUniqueId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID
+  return `${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
 // User Store
 interface UserState {
   currentUser: User | null;
@@ -25,7 +41,7 @@ export const useUserStore = create<UserState>()(
       clearUser: () => set({ currentUser: null }),
     }),
     {
-      name: 'matrix_user_session',
+      name: STORAGE_KEYS.USER_SESSION,
     }
   )
 );
@@ -95,7 +111,7 @@ export const useAgentStore = create<AgentState>()(
       }),
     }),
     {
-      name: 'matrix_agent_data',
+      name: STORAGE_KEYS.AGENT_DATA,
     }
   )
 );
@@ -209,7 +225,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
   notificationHistory: [],
   addNotification: (title, message, type = 'info') => {
     const newNote: AppNotification = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: generateUniqueId(),
       title,
       message,
       type,
@@ -248,7 +264,7 @@ export const useLanguageStore = create<LanguageState>()(
       setLanguage: (language) => set({ language }),
     }),
     {
-      name: 'matrix_language',
+      name: STORAGE_KEYS.LANGUAGE,
     }
   )
 );
