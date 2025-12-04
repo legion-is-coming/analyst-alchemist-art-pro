@@ -5,7 +5,8 @@ import { X, Cpu, Play, RotateCcw, Save } from 'lucide-react';
 import {
   AgentCapability,
   AGENT_CAPABILITY_DETAILS,
-  AppNotification
+  AppNotification,
+  CapabilityHistoryEntry
 } from '@/types';
 import { useLanguage } from '@/lib/useLanguage';
 
@@ -24,13 +25,16 @@ export default function CapabilityModal({
   capability,
   onClose
 }: CapabilityModalProps) {
-  const { t } = useLanguage();
+  const { t, dictionary } = useLanguage();
   const details = AGENT_CAPABILITY_DETAILS[capability];
   const label = t(details.labelKey);
   const role = t(details.roleKey);
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const historyEntries =
+    (dictionary.capability_history?.[capability] as CapabilityHistoryEntry[]) ||
+    [];
 
   const handleExecute = () => {
     setIsLoading(true);
@@ -67,7 +71,7 @@ export default function CapabilityModal({
 
         <div className='flex-1 flex flex-col md:flex-row overflow-hidden bg-cp-black'>
           {/* Input */}
-          <div className='w-full md:w-1/3 border-b md:border-b-0 md:border-r border-cp-border p-6 flex flex-col bg-cp-dark/10 hover-card m-2 border-transparent'>
+          <div className='w-full md:w-1/3 border-b md:border-b-0 md:border-r border-cp-border p-6 flex flex-col bg-cp-dark/10 hover-card m-2'>
             <label className='text-cp-text-muted text-xs font-bold uppercase tracking-widest mb-4 block'>
               {t('capability_modal.input_label')}
             </label>
@@ -91,23 +95,60 @@ export default function CapabilityModal({
           </div>
 
           {/* Output */}
-          <div className='flex-1 p-8 flex flex-col bg-cp-black relative'>
-            <label className='text-cp-text-muted text-xs font-bold uppercase tracking-widest mb-4 block'>
-              {t('capability_modal.output_label')}
-            </label>
-            <div className='flex-1 border border-cp-border bg-cp-dark/20 p-6 font-mono text-sm text-cp-text overflow-y-auto custom-scrollbar leading-relaxed hover-card'>
-              {output ? (
-                output
-              ) : (
-                <span className='text-gray-600 italic'>
-                  {t('capability_modal.waiting')}
-                </span>
-              )}
+          <div className='flex-1 p-8 flex flex-col bg-cp-black gap-6'>
+            <div className='flex-1 flex flex-col'>
+              <label className='text-cp-text-muted text-xs font-bold uppercase tracking-widest mb-4 block'>
+                {t('capability_modal.output_label')}
+              </label>
+              <div className='flex-1 border border-cp-border bg-cp-dark/20 p-6 font-mono text-sm text-cp-text overflow-y-auto custom-scrollbar leading-relaxed hover-card'>
+                {output ? (
+                  output
+                ) : (
+                  <span className='text-gray-600 italic'>
+                    {t('capability_modal.waiting')}
+                  </span>
+                )}
+              </div>
+              <div className='mt-6 flex justify-end'>
+                <button className='px-6 py-3 btn-outline text-xs flex items-center gap-2'>
+                  <Save size={16} /> {t('capability_modal.save')}
+                </button>
+              </div>
             </div>
-            <div className='mt-6 flex justify-end'>
-              <button className='px-6 py-3 btn-outline text-xs flex items-center gap-2'>
-                <Save size={16} /> {t('capability_modal.save')}
-              </button>
+
+            <div className='border border-cp-border/60 bg-cp-dark/20 p-4'>
+              <div className='flex items-center justify-between mb-3'>
+                <span className='type-eyebrow text-cp-text'>
+                  {t('capability_modal.history_title')}
+                </span>
+                <span className='type-caption text-cp-yellow'>
+                  {t('capability_modal.history_latency')}
+                </span>
+              </div>
+              {historyEntries.length ? (
+                <div className='space-y-2 max-h-[220px] overflow-y-auto custom-scrollbar pr-1'>
+                  {historyEntries.map((entry, idx) => (
+                    <div
+                      key={`${entry.time}-${idx}`}
+                      className='border border-cp-border/40 bg-cp-black/40 p-3 transition-colors hover:border-cp-yellow/60'>
+                      <div className='flex items-center justify-between text-[11px] type-mono text-cp-text-muted'>
+                        <span>{entry.time}</span>
+                        <span className='tracking-[0.35em]'>{entry.tag}</span>
+                      </div>
+                      <p className='text-sm text-white mt-2 leading-relaxed'>
+                        {entry.summary}
+                      </p>
+                      <p className='text-xs text-cp-text-muted mt-1'>
+                        {entry.detail}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className='text-cp-text-muted text-sm font-mono'>
+                  {t('capability_modal.history_empty')}
+                </div>
+              )}
             </div>
           </div>
         </div>

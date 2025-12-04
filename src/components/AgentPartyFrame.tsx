@@ -85,10 +85,11 @@ export default function AgentPartyFrame({
     }
   ];
 
-  const renderMember = (cap: AgentCapability) => {
+  const renderMember = (cap: AgentCapability, slotIndex: number) => {
     const label = t(`capabilities.${cap}.label`);
     const desc = t(`capabilities.${cap}.desc`);
     const role = t(`capabilities.${cap}.role`);
+    const slotTag = String(slotIndex + 1).padStart(2, '0');
 
     const Icon = {
       [AgentCapability.AUTO_TRADING]: Activity,
@@ -101,13 +102,13 @@ export default function AgentPartyFrame({
     return (
       <div
         key={cap}
-        className='group relative rounded-xl border border-cp-border bg-gradient-to-br from-cp-dark/60 via-cp-black to-cp-dark/80 p-4 hover:border-cp-yellow/60 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer'
+        className='skill-matrix-cell group cursor-pointer flex flex-col w-full'
         onClick={() => {
           onSelectCapability(cap);
         }}>
-        <div className='flex items-center justify-between gap-3'>
+        <div className='flex items-start justify-between gap-3'>
           <div className='flex items-center gap-3 min-w-0'>
-            <div className='w-11 h-11 flex shrink-0 items-center justify-center rounded-full text-cp-text-muted group-hover:text-cp-yellow transition-colors border border-cp-border bg-cp-black/60 shadow-inner'>
+            <div className='skill-matrix-icon text-cp-text-muted group-hover:text-cp-yellow'>
               <Icon size={18} strokeWidth={1.5} />
             </div>
 
@@ -115,7 +116,7 @@ export default function AgentPartyFrame({
               <h4 className='font-semibold text-white text-sm tracking-wide truncate'>
                 {label}
               </h4>
-              <p className='text-[10px] text-cp-text-muted uppercase tracking-[0.25em] mt-0.5'>
+              <p className='text-[10px] text-cp-text-muted uppercase tracking-[0.35em] mt-1'>
                 {role}
               </p>
             </div>
@@ -127,28 +128,33 @@ export default function AgentPartyFrame({
                 e.stopPropagation();
                 onEditCapability(cap);
               }}
-              className='p-2 rounded-full text-cp-text-muted hover:text-white border border-transparent hover:border-cp-border transition-colors'
+              className='p-2 text-cp-text-muted hover:text-white border border-transparent hover:border-cp-border transition-colors'
               title={t('agent_party.edit_prompt')}>
               <Settings size={14} />
             </button>
-            <button className='p-2 rounded-full text-cp-text-muted hover:text-cp-yellow border border-transparent hover:border-cp-border transition-colors'>
+            <button className='p-2 text-cp-text-muted hover:text-cp-yellow border border-transparent hover:border-cp-border transition-colors'>
               <ChevronRight size={14} />
             </button>
           </div>
         </div>
 
-        <p className='text-xs text-cp-text-muted/90 mt-3 leading-relaxed'>
+        <p className='text-xs text-cp-text-muted/90 leading-relaxed flex-1'>
           {desc}
         </p>
+
+        <div className='flex items-center justify-between text-[10px] font-mono text-cp-text-muted/80 uppercase tracking-[0.35em]'>
+          <span>{`SLOT ${slotTag}`}</span>
+          <span>CORE LINK</span>
+        </div>
       </div>
     );
   };
 
   return (
-    <div className='flex flex-col w-full h-full bg-cp-black/80 border border-cp-border rounded-2xl overflow-hidden shadow-[0_0_25px_rgba(0,0,0,0.45)]'>
-      <div className='shrink-0 bg-gradient-to-br from-cp-dark via-black to-cp-dark border-b border-cp-border p-5'>
+    <div className='flex flex-col w-full h-full bg-cp-black/80 border border-cp-border/40 overflow-hidden shadow-[0_0_35px_rgba(0,0,0,0.35)]'>
+      <div className='shrink-0 bg-gradient-to-br from-cp-dark via-black to-cp-dark border-b border-cp-border/40 p-5'>
         <div className='flex flex-wrap items-start gap-4'>
-          <div className='w-14 h-14 transition-all hover:rotate-6 border border-cp-yellow/40 bg-cp-black flex items-center justify-center shadow-[0_0_20px_rgba(197,160,89,0.2)] rounded-2xl shrink-0'>
+          <div className='w-14 h-14 transition-all hover:rotate-6 border border-cp-yellow/25 bg-cp-black flex items-center justify-center shadow-[0_0_18px_rgba(197,160,89,0.25)] shrink-0'>
             <Cpu size={20} className='text-cp-yellow' strokeWidth={1.5} />
           </div>
 
@@ -164,7 +170,7 @@ export default function AgentPartyFrame({
               </div>
 
               <div className='flex flex-wrap items-center gap-2 text-[10px] font-mono text-cp-text-muted'>
-                <span className='px-3 py-1 rounded-full border border-cp-border flex items-center gap-1 uppercase tracking-[0.3em]'>
+                <span className='px-3 py-1 border border-cp-border/50 flex items-center gap-1 uppercase tracking-[0.3em]'>
                   <StatusIcon
                     size={11}
                     className={
@@ -173,15 +179,15 @@ export default function AgentPartyFrame({
                   />
                   {statusLabel}
                 </span>
-                <span className='px-3 py-1 rounded-full border border-cp-border'>
+                <span className='px-3 py-1 border border-cp-border/50'>
                   LV.{agentLevel}
                 </span>
                 <button
                   onClick={onToggleJoin}
                   disabled={!onToggleJoin}
-                  className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                  className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition-all border ${
                     isJoined
-                      ? 'border-cp-border text-cp-text-muted hover:text-white hover:border-cp-yellow'
+                      ? 'border-transparent bg-cp-dark/40 text-cp-text-muted hover:text-white hover:bg-cp-dark/60'
                       : 'border-cp-yellow/80 bg-cp-yellow text-black hover:bg-transparent hover:text-cp-yellow'
                   } ${!onToggleJoin ? 'opacity-50 cursor-not-allowed' : ''}`}>
                   {isJoined ? t('agent_party.leave') : t('agent_party.join')}
@@ -195,7 +201,7 @@ export default function AgentPartyFrame({
           {statsCards.map(({ label, value, icon: StatIcon, accent }) => (
             <div
               key={label}
-              className='border border-cp-border rounded-xl bg-cp-black/40 p-3 shadow-inner'>
+              className='border border-cp-border/40 bg-cp-black/30 p-3 shadow-inner shadow-black/30'>
               <div className='flex items-center justify-between text-[10px] uppercase tracking-[0.25em] text-cp-text-muted'>
                 <span>{label}</span>
                 <StatIcon size={12} className={accent} />
@@ -207,39 +213,45 @@ export default function AgentPartyFrame({
           ))}
         </div>
 
-        <div className='flex flex-wrap justify-end gap-2 mt-4 pt-3 border-t border-cp-border'>
+        <div className='flex flex-wrap justify-end gap-2 mt-4 pt-3 border-t border-cp-border/40'>
           <button
             onClick={onOpenChat}
-            className='text-[10px] flex items-center gap-1 px-3 py-1 rounded-full border border-cp-border text-cp-text-muted hover:text-cp-yellow hover:border-cp-yellow transition-colors'>
+            className='text-[10px] flex items-center gap-1 px-3 py-1 bg-cp-dark/40 text-cp-text-muted hover:text-cp-yellow hover:bg-cp-dark/60 transition-colors'>
             <MessageSquare size={12} /> {t('agent_party.chat')}
           </button>
           <button
             onClick={onEditAgent}
             disabled={!onEditAgent}
-            className={`text-[10px] flex items-center gap-1 px-3 py-1 rounded-full border border-cp-border text-cp-text-muted hover:text-white transition-colors ${
+            className={`text-[10px] flex items-center gap-1 px-3 py-1 bg-cp-dark/40 text-cp-text-muted hover:text-white transition-colors ${
               !onEditAgent
                 ? 'opacity-50 cursor-not-allowed'
-                : 'hover:border-cp-border'
+                : 'hover:bg-cp-dark/60'
             }`}>
             <Edit2 size={12} /> {t('agent_party.edit_agent')}
           </button>
           <button
             onClick={onDeleteAgent}
-            className='text-[10px] flex items-center gap-1 px-3 py-1 rounded-full border border-cp-border text-cp-text-muted hover:text-cp-red hover:border-cp-red transition-colors'>
+            className='text-[10px] flex items-center gap-1 px-3 py-1 bg-cp-dark/40 text-cp-text-muted hover:text-cp-red hover:bg-cp-dark/70 transition-colors'>
             <Trash2 size={12} /> {t('agent_party.delete_agent')}
           </button>
         </div>
       </div>
 
       <div className='flex-1 overflow-y-auto custom-scrollbar bg-cp-black flex flex-col'>
-        <div className='px-5 py-3 text-[10px] font-bold text-cp-text-muted uppercase tracking-widest bg-cp-black/40 border-b border-cp-border sticky top-0 backdrop-blur-sm z-10 flex items-center justify-between'>
+        <div className='px-5 py-3 text-[10px] font-bold text-cp-text-muted uppercase tracking-widest bg-cp-black/40 border-b border-cp-border/40 sticky top-0 backdrop-blur-sm z-10 flex items-center justify-between'>
           <span>{t('agent_party.matrix')}</span>
           <span>
             {moduleCount} {t('agent_party.module_count')}
           </span>
         </div>
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-3 px-5 pb-5 pt-4'>
-          {Object.values(AgentCapability).map(renderMember)}
+        <div className='px-5 pb-5 pt-4'>
+          <div className='skill-matrix-board'>
+            <div className='skill-matrix-grid flex flex-wrap gap-px'>
+              {Object.values(AgentCapability).map((cap, idx) =>
+                renderMember(cap, idx)
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="flex-1 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 min-h-[40px]"></div>

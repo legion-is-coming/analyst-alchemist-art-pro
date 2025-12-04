@@ -29,7 +29,7 @@ export default function CompetitionJoinModal({
         </button>
 
         <div className='p-10 md:p-14 text-center'>
-          <div className='mb-6 inline-flex items-center justify-center w-16 h-16 border border-cp-yellow/50 rounded-full bg-cp-dark hover-card'>
+          <div className='mb-6 inline-flex items-center justify-center w-16 h-16 border border-cp-yellow/50 bg-cp-dark hover-card'>
             <Trophy size={32} className='text-cp-yellow' strokeWidth={1} />
           </div>
 

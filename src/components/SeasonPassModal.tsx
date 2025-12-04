@@ -67,10 +67,10 @@ export default function SeasonPassModal({
             {[1, 2, 3].map((lvl) => (
               <div
                 key={lvl}
-                className={`border flex flex-col transition-all hover-card h-full ${
+                className={`border season-pass-card flex flex-col transition-all hover-card h-full ${
                   lvl <= currentLevel
-                    ? 'border-cp-yellow/50 bg-cp-dark/20'
-                    : 'border-cp-border bg-transparent opacity-60'
+                    ? 'season-pass-card--unlocked bg-cp-dark/20'
+                    : 'bg-transparent opacity-60'
                 }`}>
                 {/* Level Header */}
                 <div className='p-4 border-b border-cp-border flex justify-between items-center bg-cp-black'>

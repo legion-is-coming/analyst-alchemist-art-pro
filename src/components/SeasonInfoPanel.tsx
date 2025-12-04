@@ -13,23 +13,48 @@ import {
   Target
 } from 'lucide-react';
 import { useLanguage } from '@/lib/useLanguage';
-import { AgentCapability } from '@/types';
+import { AgentCapability, CapabilityHistoryEntry } from '@/types';
+
+type CapabilityFeedTab = 'ANALYSIS' | 'PICKING' | 'BACKTEST' | 'REPORT';
+
+const CAPABILITY_TAB_CONFIG: Record<
+  CapabilityFeedTab,
+  { capability: AgentCapability; labelKey: string; descKey: string }
+> = {
+  ANALYSIS: {
+    capability: AgentCapability.STOCK_ANALYSIS,
+    labelKey: 'capabilities.STOCK_ANALYSIS.label',
+    descKey: 'capabilities.STOCK_ANALYSIS.desc'
+  },
+  PICKING: {
+    capability: AgentCapability.STRATEGY_PICKING,
+    labelKey: 'capabilities.STRATEGY_PICKING.label',
+    descKey: 'capabilities.STRATEGY_PICKING.desc'
+  },
+  BACKTEST: {
+    capability: AgentCapability.BACKTESTING,
+    labelKey: 'capabilities.BACKTESTING.label',
+    descKey: 'capabilities.BACKTESTING.desc'
+  },
+  REPORT: {
+    capability: AgentCapability.ARTICLE_WRITING,
+    labelKey: 'capabilities.ARTICLE_WRITING.label',
+    descKey: 'capabilities.ARTICLE_WRITING.desc'
+  }
+};
 
 interface SeasonInfoPanelProps {
   agentName: string | null;
   isJoined?: boolean;
   onOpenPass?: () => void;
-  onOpenReport?: (report: { title: string; date: string; tag: string }) => void;
-  onSelectCapability?: (cap: AgentCapability) => void;
 }
 
 export default function SeasonInfoPanel({
   agentName,
   isJoined = false,
-  onOpenPass,
-  onSelectCapability
+  onOpenPass
 }: SeasonInfoPanelProps) {
-  const { t } = useLanguage();
+  const { t, dictionary } = useLanguage();
   const [activeTab, setActiveTab] = useState<
     'SEASON' | 'LOGS' | 'ANALYSIS' | 'PICKING' | 'BACKTEST' | 'REPORT'
   >('SEASON');
@@ -41,7 +66,7 @@ export default function SeasonInfoPanel({
       type: 'info' | 'success' | 'warn' | 'error';
     }[]
   >([]);
-  
+
   const [holdings, setHoldings] = useState<
     { code: string; name: string; volume: number; price: number; pnl: number }[]
   >([]);
@@ -69,10 +94,22 @@ export default function SeasonInfoPanel({
         const now = new Date();
         const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
         const newLogs = [
-          { time: timeStr, action: '正在扫描市场波动率...', type: 'info' as const },
-          { time: timeStr, action: '检测到信号: 600030', type: 'success' as const },
+          {
+            time: timeStr,
+            action: '正在扫描市场波动率...',
+            type: 'info' as const
+          },
+          {
+            time: timeStr,
+            action: '检测到信号: 600030',
+            type: 'success' as const
+          },
           { time: timeStr, action: '风控检查通过', type: 'info' as const },
-          { time: timeStr, action: '挂单中: 买入 300750', type: 'warn' as const },
+          {
+            time: timeStr,
+            action: '挂单中: 买入 300750',
+            type: 'warn' as const
+          },
           { time: timeStr, action: '分析深度数据...', type: 'info' as const },
           { time: timeStr, action: '更新持仓盈亏...', type: 'info' as const }
         ];
@@ -85,13 +122,31 @@ export default function SeasonInfoPanel({
     }
   }, [agentName, isJoined]);
 
+  const capabilityFeedTabs = Object.keys(
+    CAPABILITY_TAB_CONFIG
+  ) as CapabilityFeedTab[];
+  const isCapabilityFeedTab = (
+    tab: typeof activeTab
+  ): tab is CapabilityFeedTab =>
+    capabilityFeedTabs.includes(tab as CapabilityFeedTab);
+  const capabilityHistory =
+    (dictionary.capability_history as
+      | Record<AgentCapability, CapabilityHistoryEntry[]>
+      | undefined) ?? {};
+  const activeFeedConfig = isCapabilityFeedTab(activeTab)
+    ? CAPABILITY_TAB_CONFIG[activeTab]
+    : null;
+  const activeFeedEntries = activeFeedConfig
+    ? capabilityHistory[activeFeedConfig.capability] ?? []
+    : [];
+
   return (
     <div className='w-full h-full flex flex-col bg-cp-black text-xs'>
       {/* Tab Header - Bottom Border Only */}
       <div className='flex items-center px-4 h-[40px] gap-6 bg-cp-black border-b border-cp-border overflow-x-auto custom-scrollbar shrink-0'>
         <button
           onClick={() => setActiveTab('SEASON')}
-          className={`h-full font-bold font-sans uppercase transition-colors flex items-center gap-2 tracking-widest tab-item shrink-0 ${
+          className={`h-full type-eyebrow tab-item shrink-0 flex items-center gap-2 transition-colors ${
             activeTab === 'SEASON' ? 'active' : ''
           }`}>
           <Crown size={12} /> 赛季概览
@@ -101,35 +156,37 @@ export default function SeasonInfoPanel({
           <>
             <button
               onClick={() => setActiveTab('LOGS')}
-              className={`h-full font-bold font-sans uppercase transition-colors flex items-center gap-2 tracking-widest tab-item shrink-0 ${
+              className={`h-full type-eyebrow tab-item shrink-0 flex items-center gap-2 transition-colors ${
                 activeTab === 'LOGS' ? 'active' : ''
               }`}>
               <Terminal size={12} /> 运行日志
             </button>
             <button
-              onClick={() =>
-                onSelectCapability?.(AgentCapability.STOCK_ANALYSIS)
-              }
-              className={`h-full font-bold font-sans uppercase transition-colors flex items-center gap-2 tracking-widest tab-item shrink-0 text-cp-text-muted hover:text-white`}>
+              onClick={() => setActiveTab('ANALYSIS')}
+              className={`h-full type-eyebrow tab-item shrink-0 flex items-center gap-2 transition-colors hover:text-white ${
+                activeTab === 'ANALYSIS' ? 'active' : ''
+              }`}>
               <BarChart2 size={12} /> 个股诊断
             </button>
             <button
-              onClick={() =>
-                onSelectCapability?.(AgentCapability.STRATEGY_PICKING)
-              }
-              className={`h-full font-bold font-sans uppercase transition-colors flex items-center gap-2 tracking-widest tab-item shrink-0 text-cp-text-muted hover:text-white`}>
+              onClick={() => setActiveTab('PICKING')}
+              className={`h-full type-eyebrow tab-item shrink-0 flex items-center gap-2 transition-colors hover:text-white ${
+                activeTab === 'PICKING' ? 'active' : ''
+              }`}>
               <Crosshair size={12} /> 智能选股
             </button>
             <button
-              onClick={() => onSelectCapability?.(AgentCapability.BACKTESTING)}
-              className={`h-full font-bold font-sans uppercase transition-colors flex items-center gap-2 tracking-widest tab-item shrink-0 text-cp-text-muted hover:text-white`}>
+              onClick={() => setActiveTab('BACKTEST')}
+              className={`h-full type-eyebrow tab-item shrink-0 flex items-center gap-2 transition-colors hover:text-white ${
+                activeTab === 'BACKTEST' ? 'active' : ''
+              }`}>
               <Rewind size={12} /> 历史回测
             </button>
             <button
-              onClick={() =>
-                onSelectCapability?.(AgentCapability.ARTICLE_WRITING)
-              }
-              className={`h-full font-bold font-sans uppercase transition-colors flex items-center gap-2 tracking-widest tab-item shrink-0 text-cp-text-muted hover:text-white`}>
+              onClick={() => setActiveTab('REPORT')}
+              className={`h-full type-eyebrow tab-item shrink-0 flex items-center gap-2 transition-colors hover:text-white ${
+                activeTab === 'REPORT' ? 'active' : ''
+              }`}>
               <FileText size={12} /> 研报生成
             </button>
           </>
@@ -138,7 +195,7 @@ export default function SeasonInfoPanel({
         <div className='flex-1'></div>
 
         {/* Status Indicator */}
-        <div className='text-[10px] text-cp-text-muted font-mono tracking-widest hidden md:block'>
+        <div className='hidden md:block type-caption type-mono'>
           SYSTEM:{' '}
           {isJoined ? <span className='text-cp-yellow'>ACTIVE</span> : 'IDLE'}
         </div>
@@ -151,17 +208,13 @@ export default function SeasonInfoPanel({
             <div className='flex flex-1 min-h-0'>
               {/* Stats - No vertical border unless needed */}
               <div className='w-1/3 p-6 flex flex-col justify-center items-center gap-3 text-center bg-cp-black'>
-                <div className='text-cp-text-muted text-[10px] uppercase tracking-widest'>
-                  赛季奖池
-                </div>
-                <div className='text-3xl font-serif font-bold text-cp-yellow'>
+                <div className='type-eyebrow'>赛季奖池</div>
+                <div className='text-3xl font-bold text-cp-yellow type-figure'>
                   ¥1.0M
                 </div>
                 <div className='w-12 h-px bg-cp-border my-2'></div>
-                <div className='text-cp-text-muted text-[10px] uppercase tracking-widest'>
-                  在线选手
-                </div>
-                <div className='text-xl font-sans font-bold text-white'>
+                <div className='type-eyebrow'>在线选手</div>
+                <div className='text-xl font-bold text-white type-figure'>
                   14,204
                 </div>
               </div>
@@ -169,10 +222,10 @@ export default function SeasonInfoPanel({
               {/* Pass Info - Clean separation */}
               <div className='flex-1 p-6 flex flex-col justify-center bg-cp-black border-l border-cp-border'>
                 <div className='flex justify-between items-center mb-4'>
-                  <span className='font-bold font-serif text-lg text-cp-text uppercase'>
+                  <span className='font-bold text-lg text-cp-text type-serif-title'>
                     下级奖励
                   </span>
-                  <span className='text-cp-yellow text-[10px] border border-cp-yellow px-2 py-0.5 font-sans font-bold tracking-widest'>
+                  <span className='text-cp-yellow type-caption border border-cp-yellow px-2 py-0.5'>
                     LV.5
                   </span>
                 </div>
@@ -199,7 +252,7 @@ export default function SeasonInfoPanel({
             {/* Left Column: Holdings */}
             <div className='w-[35%] border-r border-cp-border flex flex-col bg-cp-dark/10'>
               <div className='h-8 flex items-center px-3 border-b border-cp-border bg-cp-dark/30 shrink-0'>
-                <span className='text-[10px] font-bold text-cp-text-muted uppercase tracking-widest flex items-center gap-2'>
+                <span className='type-eyebrow flex items-center gap-2'>
                   <Target size={10} /> 实时持仓
                 </span>
               </div>
@@ -220,7 +273,7 @@ export default function SeasonInfoPanel({
                         {h.pnl}%
                       </span>
                     </div>
-                    <div className='flex justify-between items-center text-[10px] text-cp-text-muted font-mono'>
+                    <div className='flex justify-between items-center text-[10px] text-cp-text-muted type-mono'>
                       <span>{h.code}</span>
                       <span>
                         {h.volume}股 / ¥{h.price}
@@ -228,7 +281,7 @@ export default function SeasonInfoPanel({
                     </div>
                   </div>
                 ))}
-                <div className='p-2 text-[10px] text-gray-600 text-center italic mt-2'>
+                <div className='p-2 type-caption text-gray-600 text-center italic mt-2'>
                   数据延迟 3s
                 </div>
               </div>
@@ -237,11 +290,11 @@ export default function SeasonInfoPanel({
             {/* Right Column: Logs */}
             <div className='flex-1 flex flex-col min-h-0'>
               <div className='h-8 flex items-center px-3 border-b border-cp-border bg-cp-dark/30 shrink-0'>
-                <span className='text-[10px] font-bold text-cp-text-muted uppercase tracking-widest flex items-center gap-2'>
+                <span className='type-eyebrow flex items-center gap-2'>
                   <Terminal size={10} /> 系统日志
                 </span>
               </div>
-              <div className='flex-1 overflow-y-auto custom-scrollbar p-3 font-mono text-[11px] flex flex-col-reverse bg-cp-black leading-relaxed'>
+              <div className='flex-1 overflow-y-auto custom-scrollbar p-3 type-mono text-[11px] flex flex-col-reverse bg-cp-black leading-relaxed'>
                 {logs.map((log, idx) => (
                   <div
                     key={idx}
@@ -265,10 +318,59 @@ export default function SeasonInfoPanel({
                     </span>
                   </div>
                 ))}
-                <div className='text-cp-text-muted mb-4 opacity-50 select-none'>
+                <div className='text-cp-text-muted mb-4 opacity-50 select-none type-mono'>
                   --- SYSTEM STREAM START ---
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeFeedConfig && (
+          <div className='flex flex-col h-full min-h-0 bg-cp-black'>
+            <div className='flex flex-wrap items-start justify-between gap-3 p-6 border-b border-cp-border bg-cp-dark/20'>
+              <div>
+                <div className='type-eyebrow text-cp-text'>
+                  {t(activeFeedConfig.labelKey)}
+                </div>
+                <p className='text-sm text-cp-text-muted mt-2 max-w-xl leading-relaxed'>
+                  {t(activeFeedConfig.descKey)}
+                </p>
+              </div>
+              <div className='text-right'>
+                <span className='type-caption text-cp-yellow block'>
+                  {t('capability_modal.history_latency')}
+                </span>
+                {agentName && (
+                  <span className='type-mono text-[11px] text-cp-text-muted'>
+                    {agentName}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className='flex-1 overflow-y-auto custom-scrollbar p-6 space-y-3 bg-cp-black'>
+              {activeFeedEntries.length ? (
+                activeFeedEntries.map((entry, idx) => (
+                  <div
+                    key={`${entry.time}-${entry.tag}-${idx}`}
+                    className='border border-cp-border/40 bg-cp-dark/40 p-4 hover:border-cp-yellow/60 transition-colors'>
+                    <div className='flex items-center justify-between type-mono text-[11px] text-cp-text-muted'>
+                      <span>{entry.time}</span>
+                      <span className='tracking-[0.35em]'>{entry.tag}</span>
+                    </div>
+                    <p className='text-sm text-white mt-2 leading-relaxed'>
+                      {entry.summary}
+                    </p>
+                    <p className='text-xs text-cp-text-muted mt-1'>
+                      {entry.detail}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className='text-cp-text-muted text-sm font-mono'>
+                  {t('capability_modal.history_empty')}
+                </div>
+              )}
             </div>
           </div>
         )}

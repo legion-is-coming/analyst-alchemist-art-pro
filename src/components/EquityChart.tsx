@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import * as echarts from 'echarts';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { Chart } from '@antv/g2';
 import type { ChartDataPoint } from '@/types';
 
 interface EquityChartProps {
@@ -12,227 +12,198 @@ interface EquityChartProps {
 }
 
 const AGENT_COLORS = [
-  '#C5A059', // Antique Gold
-  '#E07A5F', // Terracotta
-  '#8DA399', // Sage Green
-  '#6D7E8C', // Slate Blue
-  '#D4B483', // Champagne
-  '#BC8034', // Bronze
-  '#8F5D5D', // Rosewood
-  '#5F6F65', // Olive
+  '#C5A059',
+  '#E07A5F',
+  '#8DA399',
+  '#6D7E8C',
+  '#D4B483',
+  '#BC8034',
+  '#8F5D5D',
+  '#5F6F65'
 ];
 
-export default function EquityChart({ 
-  data, 
-  highlightedAgent, 
-  onChartClick, 
-  theme = 'dark' 
+type FlattenedPoint = {
+  time: string;
+  agent: string;
+  value: number;
+};
+
+export default function EquityChart({
+  data,
+  highlightedAgent,
+  onChartClick,
+  theme = 'dark'
 }: EquityChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
-  const chartInstance = useRef<echarts.ECharts | null>(null);
-  const resizeRequestId = useRef<number | null>(null);
+  const chartInstance = useRef<Chart | null>(null);
+
+  const flattenedData = useMemo<FlattenedPoint[]>(() => {
+    const rows: FlattenedPoint[] = [];
+    data.forEach((point) => {
+      const { time, ...series } = point;
+      Object.entries(series).forEach(([agent, value]) => {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) return;
+        rows.push({ time, agent, value: numeric });
+      });
+    });
+    return rows;
+  }, [data]);
+
+  const seriesOrder = useMemo(() => {
+    if (!data.length) return [] as string[];
+    const { time, ...rest } = data[data.length - 1];
+    return Object.keys(rest);
+  }, [data]);
+
+  const colorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    seriesOrder.forEach((agent, index) => {
+      map[agent] = AGENT_COLORS[index % AGENT_COLORS.length];
+    });
+    return map;
+  }, [seriesOrder]);
 
   useEffect(() => {
     if (!chartRef.current) return;
-    if (!chartInstance.current) {
-      chartInstance.current = echarts.init(chartRef.current);
-    }
-
-    const resizeObserver = new ResizeObserver(() => {
-      if (resizeRequestId.current !== null) return;
-      resizeRequestId.current = requestAnimationFrame(() => {
-        chartInstance.current?.resize();
-        resizeRequestId.current = null;
-      });
-    });
-    resizeObserver.observe(chartRef.current);
-
-    chartInstance.current.on('click', (params) => {
-      if (params.componentType === 'series' && onChartClick) {
-        onChartClick(params.seriesName as string);
-      }
+    chartInstance.current = new Chart({
+      container: chartRef.current,
+      autoFit: true,
+      height: chartRef.current.clientHeight || 320,
+      padding: [24, 90, 40, 55]
     });
 
     return () => {
-      if (resizeRequestId.current !== null) cancelAnimationFrame(resizeRequestId.current);
-      resizeObserver.disconnect();
-      chartInstance.current?.dispose();
+      chartInstance.current?.destroy();
       chartInstance.current = null;
     };
-  }, [onChartClick]);
+  }, []);
 
   useEffect(() => {
     if (!chartInstance.current) return;
-    chartInstance.current.off('click');
-    chartInstance.current.on('click', (params) => {
-      if (params.componentType === 'series' && onChartClick) {
-        onChartClick(params.seriesName as string);
-      }
-    });
-  }, [onChartClick]);
+    const chart = chartInstance.current;
 
-  useEffect(() => {
-    if (!chartInstance.current || data.length === 0) return;
+    if (!flattenedData.length) {
+      chart.options({ type: 'view', children: [] });
+      chart.render();
+      return;
+    }
 
     const isLight = theme === 'light';
-    const textColor = isLight ? '#2C2C2C' : '#A1A1AA';
-    const tooltipBg = isLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(30, 30, 30, 0.9)';
-    const tooltipText = isLight ? '#111827' : '#E8E6E3';
+    const labelColor = isLight ? '#2C2C2C' : '#A7ADB8';
+    const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)';
 
-    const times = data.map(d => d.time);
-    const seriesKeys = Object.keys(data[data.length - 1] || {}).filter(k => k !== 'time');
-    const colors = AGENT_COLORS;
-
-    const series = seriesKeys.map((key, index) => {
-      const isHighlighted = highlightedAgent === key;
-      const isAnyHighlighted = !!highlightedAgent;
-      const isDimmed = isAnyHighlighted && highlightedAgent !== key;
-
-      const color = colors[index % colors.length];
-
-      let width = 2;
-      let z = 2;
-      let opacity = 0.8;
-
-      if (isDimmed) {
-        opacity = 0.1;
-        z = 1;
-      } else if (isHighlighted) {
-        width = 3;
-        z = 30;
-        opacity = 1;
-      } 
-
-      return {
-        name: key,
+    const baseChildren: any[] = [
+      {
         type: 'line',
-        data: data.map(d => d[key]),
-        smooth: true,
-        symbol: 'none', 
-        lineStyle: {
-          color: color,
-          width: width,
-          shadowBlur: isHighlighted ? 10 : 0,
-          shadowColor: color
+        data: flattenedData,
+        encode: {
+          x: 'time',
+          y: 'value',
+          color: 'agent',
+          series: 'agent'
         },
-        areaStyle: isHighlighted ? {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: color },
-            { offset: 1, color: 'transparent' }
-          ]),
-          opacity: 0.1
-        } : undefined,
-        endLabel: {
-          show: true,
-          formatter: (params: { seriesName: string }) => `{a|${params.seriesName}}`,
-          color: isDimmed ? 'transparent' : color,
-          fontFamily: 'Inter, "Noto Sans SC", sans-serif',
-          fontSize: 11,
-          offset: [5, 0],
-          rich: {
-            a: {
-              padding: [2, 4],
-              borderRadius: 4,
-              backgroundColor: isDimmed ? 'transparent' : (isLight ? 'rgba(255,255,255,0.9)' : 'rgba(30,30,30,0.8)'),
-              color: color,
-              fontWeight: 'bold'
-            }
+        scale: {
+          color: {
+            domain: seriesOrder,
+            range: seriesOrder.map((agent) => colorMap[agent])
           }
         },
-        itemStyle: { color },
-        z: z,
-        opacity: opacity,
-        triggerLineEvent: true,
-        emphasis: {
-          focus: 'series',
-          lineStyle: { width: 3 }
+        style: {
+          lineWidth: (datum: FlattenedPoint) =>
+            highlightedAgent ? (datum.agent === highlightedAgent ? 3 : 1) : 2,
+          opacity: (datum: FlattenedPoint) =>
+            highlightedAgent
+              ? datum.agent === highlightedAgent
+                ? 1
+                : 0.25
+              : 0.95
+        },
+        tooltip: {
+          title: 'time',
+          items: [
+            { channel: 'color' },
+            {
+              channel: 'y',
+              valueFormatter: (value: number) =>
+                `${Number.isFinite(value) ? (value - 100).toFixed(2) : '0'}%`
+            }
+          ]
         }
-      };
-    });
+      }
+    ];
 
-    const option: echarts.EChartsOption = {
-      backgroundColor: 'transparent',
-      grid: {
-        top: 30,
-        right: 120, 
-        bottom: 30,
-        left: 50,
-        containLabel: false
+    if (highlightedAgent && colorMap[highlightedAgent]) {
+      baseChildren.push({
+        type: 'area',
+        data: flattenedData.filter((row) => row.agent === highlightedAgent),
+        encode: {
+          x: 'time',
+          y: 'value'
+        },
+        style: {
+          fill: colorMap[highlightedAgent],
+          fillOpacity: 0.12
+        }
+      });
+    }
+
+    chart.options({
+      type: 'view',
+      data: flattenedData,
+      padding: [24, 90, 40, 55],
+      scale: {
+        value: {
+          nice: true
+        },
+        color: {
+          domain: seriesOrder,
+          range: seriesOrder.map((agent) => colorMap[agent])
+        }
+      },
+      axis: {
+        x: {
+          tick: false,
+          title: null,
+          style: {
+            labelFill: labelColor,
+            labelFontSize: 11
+          }
+        },
+        y: {
+          title: null,
+          style: {
+            labelFill: labelColor,
+            gridStroke: gridColor,
+            gridLineDash: [4, 4],
+            labelFontSize: 11
+          },
+          labelFormatter: (value: number) => `${(value - 100).toFixed(0)}%`
+        }
       },
       tooltip: {
-        trigger: 'axis',
-        backgroundColor: tooltipBg,
-        borderColor: 'rgba(255,255,255,0.1)',
-        borderRadius: 8,
-        padding: 12,
-        textStyle: {
-          color: tooltipText,
-          fontFamily: 'Inter, "Noto Sans SC", sans-serif',
-          fontSize: 13
-        },
-        axisPointer: {
-          type: 'line',
-          lineStyle: {
-            color: 'rgba(197, 160, 89, 0.5)',
-            width: 1,
-            type: 'solid'
-          }
-        },
-        formatter: (params: unknown) => {
-          const typedParams = params as Array<{ axisValue: string; value: number; seriesName: string; color: string }>;
-          const userColor = '#C5A059';
-          let res = `<div style="font-family: 'Inter', 'Noto Sans SC', sans-serif; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; margin-bottom: 6px; color: ${tooltipText}">${typedParams[0].axisValue}</div>`;
-          const sortedParams = typedParams.sort((a, b) => b.value - a.value);
-          
-          let count = 0;
-          sortedParams.forEach((item) => {
-            const profit = (item.value - 100).toFixed(2);
-            const isSelected = item.seriesName === highlightedAgent;
-            
-            if (isSelected || count < 8) {
-              const color = item.color;
-              const fontWeight = isSelected ? 'bold' : 'normal';
-              const nameColor = isSelected ? userColor : tooltipText;
-              const profitColor = parseFloat(profit) > 0 ? (isLight ? '#B08D55' : '#C5A059') : (isLight ? '#C45F45' : '#E07A5F');
-              
-              res += `<div style="display: flex; justify-content: space-between; gap: 15px; color: ${nameColor}; font-weight: ${fontWeight}; padding: 2px 0;">
-                      <span><span style="display:inline-block;margin-right:6px;border-radius:50%;width:8px;height:8px;background-color:${color};"></span>${item.seriesName}</span>
-                      <span style="color:${profitColor}">${parseFloat(profit) > 0 ? '+' : ''}${profit}%</span>
-                      </div>`;
-              count++;
-            }
-          });
-          return res;
-        }
+        title: 'time'
       },
-      xAxis: {
-        type: 'category',
-        data: times,
-        axisLine: { show: false },
-        axisTick: { show: false },
-        axisLabel: { color: textColor, fontFamily: 'Inter, "Noto Sans SC", sans-serif', fontSize: 11 },
-        splitLine: { show: false }
-      },
-      yAxis: {
-        type: 'value',
-        scale: true,
-        axisLabel: { 
-          color: textColor, 
-          fontFamily: 'Inter, "Noto Sans SC", sans-serif', 
-          fontSize: 11,
-          formatter: (value: number) => `${(value - 100).toFixed(0)}%`
-        },
-        axisLine: { show: false },
-        splitLine: { 
-          show: true,
-          lineStyle: { color: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)', type: 'dashed' } 
-        }
-      },
-      series: series as echarts.SeriesOption[]
-    };
+      children: baseChildren
+    });
 
-    chartInstance.current.setOption(option);
-  }, [data, highlightedAgent, theme]);
+    chart.render();
 
-  return <div ref={chartRef} className="w-full h-full min-h-[300px]" />;
+    chart.off('element:click');
+    chart.on('element:click', (event) => {
+      const agent = event.data?.data?.agent;
+      if (agent && onChartClick) {
+        onChartClick(agent);
+      }
+    });
+  }, [
+    flattenedData,
+    highlightedAgent,
+    onChartClick,
+    theme,
+    seriesOrder,
+    colorMap
+  ]);
+
+  return <div ref={chartRef} className='w-full h-full min-h-[300px]' />;
 }

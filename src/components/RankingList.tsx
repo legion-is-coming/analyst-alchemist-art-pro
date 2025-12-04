@@ -8,7 +8,7 @@ import {
   Shield,
   Hexagon,
   Activity,
-  User,
+  User
 } from 'lucide-react';
 import type { RankingItem } from '@/types';
 import gsap from 'gsap';
@@ -114,7 +114,7 @@ export default function RankingList({
       onClick={() => onSelectAgent(agent.name)}>
       <div className='absolute left-0 top-0 bottom-0 w-[4px] bg-cp-yellow transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300'></div>
 
-      <div className='w-16 shrink-0 font-serif font-bold text-lg text-cp-text-muted group-hover:text-cp-text flex items-center gap-2 group-hover:translate-x-2 transition-transform'>
+      <div className='w-16 shrink-0 font-bold text-lg text-cp-text-muted group-hover:text-cp-text flex items-center gap-2 group-hover:translate-x-2 transition-transform type-figure'>
         {isPinned && <User size={14} className='text-cp-yellow' />}
         <span className={agent.rank <= 3 ? 'text-cp-yellow' : ''}>
           {agent.rank < 10 ? `0${agent.rank}` : agent.rank}
@@ -128,28 +128,29 @@ export default function RankingList({
           }`}>
           {getClassIcon(agent.class)}
         </div>
-        <div className='flex flex-col justify-center'>
+        <div className='flex flex-col justify-center min-w-0'>
           <span
             className={`font-serif font-bold text-base truncate ${
               isPinned ? 'text-cp-yellow' : 'text-cp-text'
             } group-hover:text-white`}>
             {agent.name}
           </span>
-          <span className='text-[10px] uppercase tracking-wider text-cp-text-muted'>
-            {agent.class} {t('ranking.model_suffix')}
-          </span>
+          <div className='flex items-center justify-between gap-3'>
+            <span className='type-caption'>
+              {agent.class} {t('ranking.model_suffix')}
+            </span>
+            <span
+              className={`type-figure text-xs font-semibold ${
+                agent.rawProfit > 0
+                  ? 'text-cp-yellow'
+                  : agent.rawProfit < 0
+                  ? 'text-cp-red'
+                  : 'text-cp-text-muted'
+              }`}>
+              {agent.profit}
+            </span>
+          </div>
         </div>
-      </div>
-
-      <div
-        className={`w-28 text-right font-mono font-bold text-base ${
-          agent.rawProfit > 0
-            ? 'text-cp-yellow'
-            : agent.rawProfit < 0
-            ? 'text-cp-red'
-            : 'text-cp-text-muted'
-        } group-hover:scale-105 transition-transform`}>
-        {agent.profit}
       </div>
 
       {!isPinned && (
@@ -169,7 +170,7 @@ export default function RankingList({
 
   return (
     <div className='w-full h-full flex flex-col min-h-0 bg-cp-black'>
-      <div className='flex items-center text-[10px] text-cp-text-muted font-bold uppercase tracking-widest shrink-0 h-[40px] px-6 font-sans bg-cp-dark'>
+      <div className='flex items-center type-eyebrow shrink-0 h-[40px] px-6 font-sans bg-cp-dark'>
         <div className='w-16 shrink-0'>{t('ranking.col_rank')}</div>
         <div className='flex-1 pl-12'>{t('ranking.col_name')}</div>
         <div className='w-28 text-right'>{t('ranking.col_profit')}</div>

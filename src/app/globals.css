@@ -35,13 +35,14 @@ body {
   font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
   background-color: var(--cp-black);
   color: var(--cp-text);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-size: 15px;
   line-height: 1.65;
   letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
@@ -101,6 +102,39 @@ h6 {
 /* Text Utilities */
 .text-glow {
   text-shadow: 0 0 20px rgba(197, 160, 89, 0.2);
+}
+
+/* Typography Tokens */
+.type-eyebrow {
+  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--cp-text-muted);
+}
+.type-caption {
+  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--cp-text-muted);
+}
+.type-figure {
+  font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+.type-mono {
+  font-family: 'JetBrains Mono', 'Space Mono', 'IBM Plex Mono', 'Fira Code',
+    monospace;
+  letter-spacing: 0.08em;
+}
+.type-serif-title {
+  font-family: 'Noto Serif SC', 'Space Grotesk', 'Noto Sans SC', serif;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
 }
 
 /* Button Styles */
@@ -182,10 +216,97 @@ h6 {
   border-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Corner system */
+:root {
+  --cp-corner-radius: 0px;
+}
+.rounded,
+[class*='rounded-'] {
+  border-radius: var(--cp-corner-radius) !important;
+}
+
+/* Card Border Overrides */
+.core-module-card,
+.season-pass-card {
+  border: 1px solid var(--cp-border) !important;
+}
+.core-module-card--active {
+  border-color: var(--cp-yellow) !important;
+}
+.season-pass-card--unlocked {
+  border-color: rgba(197, 160, 89, 0.5) !important;
+}
+
+/* Skill matrix */
+.skill-matrix-board {
+  position: relative;
+  padding: 1px;
+  background: linear-gradient(
+    145deg,
+    rgba(10, 10, 10, 0.95),
+    rgba(26, 26, 26, 0.85)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.55);
+}
+.skill-matrix-board::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.15;
+}
+.skill-matrix-grid {
+  position: relative;
+  z-index: 1;
+}
+.skill-matrix-cell {
+  background: rgba(5, 5, 5, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  min-height: 140px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.35);
+}
+.skill-matrix-cell:hover {
+  border-color: rgba(197, 160, 89, 0.7);
+  box-shadow: 0 0 25px rgba(197, 160, 89, 0.12);
+  transform: translateY(-2px);
+}
+.skill-matrix-icon {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.45);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.skill-matrix-cell:hover .skill-matrix-icon {
+  border-color: rgba(197, 160, 89, 0.85);
+  color: var(--cp-yellow);
+}
+
 /* Custom Tailwind Animations */
 @keyframes shrink-width {
-  from { width: 100%; }
-  to { width: 0%; }
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }
 .animate-shrink {
   animation: shrink-width 5s linear forwards;
@@ -193,20 +314,36 @@ h6 {
 
 /* Animate In */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes slideInFromBottom {
-  from { transform: translateY(10px); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(10px);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 @keyframes slideInFromRight {
-  from { transform: translateX(10px); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(10px);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 @keyframes slideInFromTop {
-  from { transform: translateY(-10px); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(-10px);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .animate-in {
@@ -242,11 +379,25 @@ h6 {
   animation-name: slideInFromTop;
 }
 
-.duration-200 { animation-duration: 200ms; }
-.duration-300 { animation-duration: 300ms; }
-.duration-500 { animation-duration: 500ms; }
-.duration-700 { animation-duration: 700ms; }
-.duration-1000 { animation-duration: 1000ms; }
+.duration-200 {
+  animation-duration: 200ms;
+}
+.duration-300 {
+  animation-duration: 300ms;
+}
+.duration-500 {
+  animation-duration: 500ms;
+}
+.duration-700 {
+  animation-duration: 700ms;
+}
+.duration-1000 {
+  animation-duration: 1000ms;
+}
 
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
+.delay-200 {
+  animation-delay: 200ms;
+}
+.delay-300 {
+  animation-delay: 300ms;
+}

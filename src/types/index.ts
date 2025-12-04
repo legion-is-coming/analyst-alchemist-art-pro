@@ -84,6 +84,13 @@ export interface AppNotification {
   timestamp: number;
 }
 
+export interface CapabilityHistoryEntry {
+  time: string;
+  tag: string;
+  summary: string;
+  detail: string;
+}
+
 export const AGENT_CAPABILITY_DETAILS: Record<
   AgentCapability,
   { icon: string; labelKey: string; descKey: string; roleKey: string }

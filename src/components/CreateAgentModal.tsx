@@ -329,7 +329,7 @@ export default function CreateAgentModal({
             <div className='flex-1 flex flex-col justify-center items-center p-8 animate-in fade-in slide-in-from-bottom-4'>
               <div className='w-full max-w-md space-y-12 text-center'>
                 <div className='space-y-4'>
-                  <div className='w-24 h-24 mx-auto border border-cp-yellow/30 rounded-full flex items-center justify-center mb-6 bg-cp-dark shadow-[0_0_40px_rgba(197,160,89,0.1)] hover-card'>
+                  <div className='w-24 h-24 mx-auto border border-cp-yellow/30 flex items-center justify-center mb-6 bg-cp-dark shadow-[0_0_40px_rgba(197,160,89,0.1)] hover-card'>
                     <Brain
                       size={40}
                       className='text-cp-yellow opacity-80'
@@ -385,11 +385,11 @@ export default function CreateAgentModal({
                     <div
                       key={preset.id}
                       onClick={() => handlePresetSelect(preset.id)}
-                      className={`p-8 cursor-pointer transition-all flex flex-col gap-6 group relative border hover-card min-h-[200px]
+                      className={`border core-module-card hover-card p-8 cursor-pointer transition-all flex flex-col gap-6 group relative min-h-[200px]
                                         ${
                                           isSelected
-                                            ? 'border-cp-yellow bg-cp-dark/50'
-                                            : 'border-cp-border bg-transparent hover:border-gray-600'
+                                            ? 'core-module-card--active bg-cp-dark/50'
+                                            : 'bg-transparent hover:border-gray-600'
                                         }
                                     `}>
                       <div className='flex justify-between items-start'>
@@ -595,7 +595,7 @@ export default function CreateAgentModal({
                     className='hidden'
                     multiple
                   />
-                  <div className='w-16 h-16 rounded-full bg-cp-black border border-cp-border flex items-center justify-center mb-6 group-hover:scale-110 transition-transform'>
+                  <div className='w-16 h-16 bg-cp-black border border-cp-border flex items-center justify-center mb-6 group-hover:scale-110 transition-transform'>
                     <Upload
                       size={24}
                       className='text-cp-text-muted group-hover:text-cp-yellow'
