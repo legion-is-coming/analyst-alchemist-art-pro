@@ -155,7 +155,7 @@ export default function AgentPartyFrame({
     return (
       <div
         key={cap}
-        className='group relative p-5 border-b border-white/[0.02] hover:bg-white/[0.03] transition-all duration-300 cursor-pointer flex flex-col gap-4 overflow-hidden'
+        className='group relative p-3 border-b border-white/[0.02] hover:bg-white/[0.03] transition-all duration-300 cursor-pointer flex flex-col  overflow-hidden'
         onClick={() => {
           onSelectCapability(cap);
         }}>
@@ -195,7 +195,7 @@ export default function AgentPartyFrame({
           </div>
         </div>
 
-        <div className='relative z-10 grid grid-cols-2 gap-3 text-[11px] text-cp-text-muted leading-relaxed'>
+        {/* <div className='relative z-10 grid grid-cols-2 gap-3 text-[11px] text-cp-text-muted leading-relaxed'>
           <p className='col-span-2 text-cp-text-muted/90'>{desc}</p>
           {meta.metrics.map((metric) => (
             <div
@@ -218,13 +218,13 @@ export default function AgentPartyFrame({
               {meta.latency}
             </span>
           </div>
-        </div>
+        </div> */}
 
-        <div className='relative z-10 mt-auto pt-2 flex items-center justify-between text-[10px] font-mono text-cp-text-muted/60 uppercase tracking-[0.2em]'>
+        <div className='relative z-10 mt-auto pt-2 flex items-center justify-end text-[10px] font-mono text-cp-text-muted/60 uppercase tracking-[0.2em]'>
           <span>SKILL_{slotTag}</span>
-          <span className='group-hover:text-cp-cyan transition-colors'>
+          {/* <span className='group-hover:text-cp-cyan transition-colors'>
             {liveLabel}
-          </span>
+          </span> */}
         </div>
       </div>
     );

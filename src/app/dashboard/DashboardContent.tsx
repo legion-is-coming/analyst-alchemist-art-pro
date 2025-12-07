@@ -173,6 +173,7 @@ export default function DashboardContent() {
     setAgentClass,
     setAgentStats,
     setAgentModules,
+    setLastFetchedUserId,
     setAgentId,
     updateCustomPrompt,
     setIsJoinedCompetition,
@@ -320,19 +321,6 @@ export default function DashboardContent() {
 
   // Handle user agent rank/profit
   useEffect(() => {
-    if (agentName && isJoinedCompetition && rankingList.length > 0) {
-      const userAgent = rankingList.find((a) => a.isUser);
-      if (userAgent) {
-        setUserRank(userAgent.rank);
-        setUserProfit(userAgent.profit);
-      }
-    } else {
-      setUserRank(null);
-      setUserProfit(null);
-    }
-  }, [agentName, isJoinedCompetition, rankingList]);
-
-  useEffect(() => {
     const resolvedUserId = (() => {
       if (currentUser?.id) return currentUser.id;
       if (typeof window === 'undefined') return null;
@@ -349,42 +337,58 @@ export default function DashboardContent() {
     if (!resolvedUserId) return;
 
     const controller = new AbortController();
+    let cancelled = false;
+
     const fetchAgent = async () => {
       try {
-        const query = `http://localhost:8000/api/v1/agents?user_id=${encodeURIComponent(
+        const query = `/api/agents?user_id=${encodeURIComponent(
           resolvedUserId
         )}&skip=0&limit=1`;
         const res = await fetch(query, { signal: controller.signal });
-        if (!res.ok) return;
+        if (!res.ok || cancelled) return;
         const data = await res.json();
+        if (cancelled) return;
         if (data?.agents?.length) {
           const agent = data.agents[0];
           const resolvedAgentId = agent.agent_id || agent.id || null;
-          const workflowId:
-            | '价值投资者'
-            | '量化交易者'
-            | '成长股投资者'
-            | null =
-            agent.workflow_id === 'track_thinking'
-              ? '价值投资者'
-              : agent.workflow_id === 'quant_thinking'
-              ? '量化交易者'
-              : agent.workflow_id === 'news_thinking'
-              ? '成长股投资者'
-              : null;
-
+          const workflowId = agent.workflow_id || null;
           setAgentId(resolvedAgentId);
           setAgentName(agent.agent_name);
           if (workflowId) setAgentClass(workflowId);
+          setLastFetchedUserId(resolvedUserId);
         }
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') return;
         // silent fail
       }
     };
-    fetchAgent();
-    return () => controller.abort();
-  }, [currentUser?.id, setAgentClass, setAgentId, setAgentName]);
+
+    const timer = setTimeout(fetchAgent, 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [
+    currentUser?.id,
+    setAgentClass,
+    setAgentId,
+    setAgentName,
+    setLastFetchedUserId
+  ]);
+
+  useEffect(() => {
+    if (agentName && isJoinedCompetition && rankingList.length > 0) {
+      const userAgent = rankingList.find((a) => a.isUser);
+      if (userAgent) {
+        setUserRank(userAgent.rank);
+        setUserProfit(userAgent.profit);
+      }
+    } else {
+      setUserRank(null);
+      setUserProfit(null);
+    }
+  }, [agentName, isJoinedCompetition, rankingList]);
 
   // Actions
   const handleLogin = (username: string, email?: string) => {
@@ -469,10 +473,9 @@ export default function DashboardContent() {
     }
 
     try {
-      const res = await fetch(
-        `http://localhost:8000/api/v1/agents/${encodeURIComponent(agentId)}`,
-        { method: 'DELETE' }
-      );
+      const res = await fetch(`/api/agents/${encodeURIComponent(agentId)}`, {
+        method: 'DELETE'
+      });
 
       if (!res.ok) {
         const errorText = await res.text();

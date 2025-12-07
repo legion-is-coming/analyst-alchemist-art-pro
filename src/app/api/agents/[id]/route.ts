@@ -1,0 +1,30 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { apiUrl } from '@/lib/api';
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+  if (!id) {
+    return NextResponse.json({ message: '缺少 agent id' }, { status: 400 });
+  }
+
+  const target = apiUrl(`/api/v1/agents/${encodeURIComponent(id)}`);
+  const res = await fetch(target, { method: 'DELETE' });
+  const text = await res.text();
+
+  if (!res.ok) {
+    return NextResponse.json(
+      { message: text || '请求失败' },
+      { status: res.status }
+    );
+  }
+
+  try {
+    const data = JSON.parse(text);
+    return NextResponse.json(data, { status: res.status });
+  } catch (_) {
+    return new Response(text, { status: res.status });
+  }
+}

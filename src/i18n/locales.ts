@@ -88,7 +88,8 @@ export const translations = {
       news_source: '新闻源（可选）',
       loading: '执行中...',
       missing_agent_title: '缺少 Agent',
-      missing_agent_desc: '请先创建或选择 Agent 后再执行。'
+      missing_agent_desc: '请先创建或选择 Agent 后再执行。',
+      net_profit_margin_min: '净利率下限 (%)'
     },
     capability_history: {
       AUTO_TRADING: [
@@ -488,7 +489,8 @@ export const translations = {
       news_source: 'News Source (optional)',
       loading: 'Running...',
       missing_agent_title: 'Agent required',
-      missing_agent_desc: 'Create or select an agent before executing.'
+      missing_agent_desc: 'Create or select an agent before executing.',
+      net_profit_margin_min: 'Net profit margin min (%)'
     },
     capability_history: {
       AUTO_TRADING: [

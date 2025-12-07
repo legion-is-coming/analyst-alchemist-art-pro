@@ -21,7 +21,7 @@ import {
 // Removed antd; using native inputs for sliders and selects
 import * as echarts from 'echarts';
 import type { AgentStats, AgentModule, AppNotification } from '@/types';
-import { useUserStore } from '@/store';
+import { useUserStore, useAgentStore } from '@/store';
 
 interface CreateAgentModalProps {
   onCreate: (
@@ -157,6 +157,14 @@ export default function CreateAgentModal({
   onNotify
 }: CreateAgentModalProps) {
   const { currentUser } = useUserStore();
+  const {
+    agentName,
+    agentClass,
+    agentId,
+    setAgentId,
+    setAgentName,
+    setAgentClass
+  } = useAgentStore();
   const [step, setStep] = useState<CreationStep>('naming');
   const [name, setName] = useState('');
   const [selectedPresetId, setSelectedPresetId] = useState<ArchetypeId | ''>(
@@ -189,7 +197,6 @@ export default function CreateAgentModal({
     workflow_id: string;
     risk_profile: string;
   } | null>(null);
-  const fetchedUserIdRef = useRef<string | null>(null);
   const appliedExistingRef = useRef(false);
 
   const chartRef = useRef<HTMLDivElement>(null);
@@ -258,49 +265,14 @@ export default function CreateAgentModal({
   };
 
   useEffect(() => {
-    const resolvedUserId = (() => {
-      if (currentUser?.id) return currentUser.id;
-      if (typeof window === 'undefined') return null;
-      try {
-        const raw = localStorage.getItem('matrix_user_session');
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        return parsed?.state?.currentUser?.id ?? null;
-      } catch (_) {
-        return null;
-      }
-    })();
-
-    if (!resolvedUserId) return;
-    if (fetchedUserIdRef.current === resolvedUserId) return;
-    fetchedUserIdRef.current = resolvedUserId;
-
-    const controller = new AbortController();
-    const fetchAgent = async () => {
-      try {
-        const query = `http://localhost:8000/api/v1/agents?user_id=${encodeURIComponent(
-          resolvedUserId
-        )}&skip=0&limit=1`;
-        const res = await fetch(query, { signal: controller.signal });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data?.agents?.length) {
-          const agent = data.agents[0];
-          setExistingAgent({
-            agent_id: agent.agent_id || agent.id || null,
-            agent_name: agent.agent_name,
-            workflow_id: agent.workflow_id,
-            risk_profile: agent.risk_profile
-          });
-        }
-      } catch (err) {
-        if (err instanceof DOMException && err.name === 'AbortError') return;
-        // fail silently
-      }
-    };
-    fetchAgent();
-    return () => controller.abort();
-  }, [currentUser?.id]);
+    if (!agentId || !agentName || existingAgent) return;
+    setExistingAgent({
+      agent_id: agentId,
+      agent_name: agentName,
+      workflow_id: agentClass,
+      risk_profile: ''
+    });
+  }, [agentId, agentClass, agentName, existingAgent]);
 
   useEffect(() => {
     if (!existingAgent || appliedExistingRef.current) return;
@@ -402,7 +374,7 @@ export default function CreateAgentModal({
 
     try {
       setIsSubmitting(true);
-      const response = await fetch('http://localhost:8000/api/v1/agents', {
+      const response = await fetch('/api/agents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
