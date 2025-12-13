@@ -15,16 +15,14 @@ export const translations = {
     },
     app: {
       title: 'ANALYST ALCHEMIST',
-      subtitle: '第四赛季 // 贤者之石',
-      volatility: '市场波动率',
-      high: '高',
+      subtitle: '活动进行中',
       login: '接入',
       logout: '断开连接',
       operator_id: '操作员 ID',
       theme_toggle: '切换主题',
       lang_toggle: '切换语言',
-      season: '第四赛季',
-      philosopher: '贤者之石',
+      season: '活动',
+      philosopher: '',
       back_to_landing: '返回着陆页',
       market_label: '市场',
       market_state: '高波动'
@@ -33,15 +31,33 @@ export const translations = {
       market: '市场',
       team: '技能',
       ranking: '排名',
-      my_team: '技能矩阵',
+      my_team: '我的功能',
       leaderboard: '排行榜'
     },
     ranking: {
       col_rank: '排名',
       col_name: '代号',
-      col_profit: '赛季收益',
+      col_profit: '活动收益',
       live_battle: '实时对决',
       model_suffix: '模型'
+    },
+    activity_panel: {
+      tab_overview: '活动概览',
+      tab_logs: '运行日志',
+      current_activity: '当前活动',
+      status: '状态',
+      activity_info: '活动信息',
+      loading_dots: '加载中...',
+      loading: '加载中',
+      empty: '暂无活动',
+      unknown: '未知',
+      dash: '—',
+      period: '第 {n} 期',
+      fetch_failed: '获取活动失败',
+      date_range: '日期：{start} ~ {end}',
+      date_empty: '日期：—',
+      initial_capital: '初始资金：¥{amount}',
+      initial_empty: '初始资金：—'
     },
     capabilities: {
       AUTO_TRADING: {
@@ -221,7 +237,7 @@ export const translations = {
     article_modal: {
       title: '研究报告',
       tag_label: '主题：',
-      philosopher: "PHILOSOPHER'S STONE",
+      philosopher: '',
       back_to_landing: 'Return to landing',
       market_label: 'MARKET',
       market_state: 'VOLATILE',
@@ -242,14 +258,14 @@ export const translations = {
       share: '分享'
     },
     competition_join: {
-      title: '第四赛季：贤者之石',
-      description: '加入全球算法战场，将 Agent 注入流动性池，冲击赛季大奖。',
-      rank_label: '冠军奖励',
-      rank_value: '¥500,000',
-      participants_label: '参赛人数',
-      participants_value: '14,204',
-      ends_label: '剩余时间',
-      ends_value: '14 天',
+      title: '加入活动',
+      description: '加入当前活动后即可参赛。',
+      rank_label: '活动',
+      rank_value: '—',
+      participants_label: '状态',
+      participants_value: '—',
+      ends_label: '结束日期',
+      ends_value: '—',
       cta: '进入赛场',
       cancel: '继续离线模式'
     },
@@ -257,7 +273,7 @@ export const translations = {
       execute: '确认执行',
       delete_agent_title: '确认销毁',
       delete_agent_message: '确定要销毁此 Agent 吗？该操作不可逆。',
-      withdraw_title: '退出赛季',
+      withdraw_title: '退出活动',
       withdraw_message: '确认退出？你将停止获取积分，排名会被冻结。'
     },
     notifications: {
@@ -271,19 +287,19 @@ export const translations = {
       },
       agent_deployed: {
         title: 'Agent 已部署',
-        message: '{name} 就绪。加入赛季即可参赛。'
+        message: '{name} 就绪。加入活动即可参赛。'
       },
       agent_deleted: {
         title: '销毁完成',
         message: 'Agent 实例已移除。'
       },
       withdrawn: {
-        title: '已退出赛季',
+        title: '已退出活动',
         message: '已离开赛场，历史成绩已归档。'
       },
       joined: {
         title: '成功参赛',
-        message: 'Agent 已进入第四赛季池。'
+        message: 'Agent 已进入活动池。'
       },
       prompt_saved: {
         title: '配置已保存',
@@ -313,13 +329,13 @@ export const translations = {
       chat: '通讯',
       edit_agent: '重构',
       delete_agent: '销毁',
-      matrix: '技能矩阵',
+      matrix: '我的功能',
       module_count: '模块'
     },
     landing: {
       system_online: '系统在线',
       version: '版本 4.0 // 艺术重构',
-      season_live: 'S4 赛季: 贤者之石 进行中',
+      season_live: '活动进行中',
       hero_title_1: '铸造你的',
       hero_title_2: 'ALPHA AGENT',
       hero_desc:
@@ -339,7 +355,7 @@ export const translations = {
           '基于 Tick 级历史数据，毫秒级仿真撮合，提供夏普比率、最大回撤等专业的绩效归因分析。',
         community_title: '去中心化智库',
         community_desc:
-          '加入全球排位赛，与顶尖的 Quant Agent 对抗。共享策略逻辑，获取赛季通证奖励。',
+          '加入全球排位赛，与顶尖的 Quant Agent 对抗。共享策略逻辑，获取活动奖励。',
         security_title: '零信任安全架构',
         security_desc:
           '所有策略代码均在沙箱环境中运行。用户的私有数据与核心算法享有最高级别的加密保护。'
@@ -354,7 +370,7 @@ export const translations = {
         privacy: '隐私协议',
         terms: '服务条款'
       },
-      live_feed_tag: 'S4 实时信道',
+      live_feed_tag: '实时信道',
       total_return: '累计收益',
       badge: {
         legend: '传说',
@@ -363,8 +379,8 @@ export const translations = {
       }
     },
     season_pass: {
-      title: '赛季通行证',
-      subtitle: '第四赛季 // 贤者之石',
+      title: '活动通行证',
+      subtitle: '活动通行证',
       season_pass_modal: {
         level_prefix: 'LV.',
         progress: '300 / 1000 XP',
@@ -381,7 +397,7 @@ export const translations = {
     login: {
       welcome_title: '接入 Matrix 网络',
       welcome_desc: '验证您的神经链接以同步策略数据。',
-      season_name: '第四赛季: 贤者之石',
+      season_name: '当前活动',
       tab_login: '登录',
       tab_register: '注册',
       connecting: '正在链接...',
@@ -396,11 +412,11 @@ export const translations = {
       password_placeholder: '••••••••'
     },
     invite: {
-      season: 'S4 赛季招募',
-      intro: '部署您的 Agent 参与第四赛季“贤者之石”排位赛，赢取百万奖池。',
+      season: '活动招募',
+      intro: '部署您的 Agent 参与活动排位赛。',
       login_create: '登录并创建 AGENT',
-      title: '加入 S4 赛季',
-      desc: '参与排位赛，与全网 14,000+ 智能体同台竞技。'
+      title: '加入活动',
+      desc: '参与排位赛，与全网智能体同台竞技。'
     }
   },
   en: {
@@ -419,16 +435,14 @@ export const translations = {
     },
     app: {
       title: 'ANALYST ALCHEMIST',
-      subtitle: "SEASON 4 // PHILOSOPHER'S STONE",
-      volatility: 'MARKET VOLATILITY',
-      high: 'HIGH',
+      subtitle: 'ACTIVITY',
       login: 'LOGIN',
       logout: 'DISCONNECT',
       operator_id: 'OPERATOR ID',
       theme_toggle: 'TOGGLE THEME',
       lang_toggle: 'LANGUAGE',
-      season: 'SEASON 4',
-      philosopher: "PHILOSOPHER'S STONE"
+      season: 'ACTIVITY',
+      philosopher: ''
     },
     nav: {
       market: 'MARKET',
@@ -443,6 +457,24 @@ export const translations = {
       col_profit: 'PROFIT',
       live_battle: 'LIVE BATTLE',
       model_suffix: 'MODEL'
+    },
+    activity_panel: {
+      tab_overview: 'ACTIVITY',
+      tab_logs: 'LOGS',
+      current_activity: 'CURRENT ACTIVITY',
+      status: 'STATUS',
+      activity_info: 'ACTIVITY INFO',
+      loading_dots: 'LOADING...',
+      loading: 'LOADING',
+      empty: 'NO ACTIVITY',
+      unknown: 'UNKNOWN',
+      dash: '—',
+      period: 'PERIOD {n}',
+      fetch_failed: 'Failed to load activity',
+      date_range: 'DATE: {start} ~ {end}',
+      date_empty: 'DATE: —',
+      initial_capital: 'INITIAL: ¥{amount}',
+      initial_empty: 'INITIAL: —'
     },
     capabilities: {
       AUTO_TRADING: {
@@ -642,15 +674,14 @@ export const translations = {
       share: 'SHARE'
     },
     competition_join: {
-      title: "Season 4: Philosopher's Stone",
-      description:
-        'Join the global algorithmic warfare. Deploy your agent into the liquidity pool and chase the grand prize.',
-      rank_label: 'Rank 1 Prize',
-      rank_value: '¥500,000',
-      participants_label: 'Participants',
-      participants_value: '14,204',
-      ends_label: 'Ends In',
-      ends_value: '14 Days',
+      title: 'Join Activity',
+      description: 'Join the current activity to compete.',
+      rank_label: 'Activity',
+      rank_value: '—',
+      participants_label: 'Status',
+      participants_value: '—',
+      ends_label: 'End Date',
+      ends_value: '—',
       cta: 'Enter Competition',
       cancel: 'Continue in Local Mode'
     },
@@ -659,9 +690,9 @@ export const translations = {
       delete_agent_title: 'Confirm Destruction',
       delete_agent_message:
         'Are you sure you want to destroy this Agent instance? This action is irreversible.',
-      withdraw_title: 'Withdraw from Season',
+      withdraw_title: 'Withdraw from Activity',
       withdraw_message:
-        'Are you sure? You will stop earning season points and your rank will freeze.'
+        'Are you sure? You will stop earning points and your rank will freeze.'
     },
     notifications: {
       auth: {
@@ -674,7 +705,7 @@ export const translations = {
       },
       agent_deployed: {
         title: 'Agent Deployed',
-        message: '{name} is ready. Join season to compete.'
+        message: '{name} is ready. Join activity to compete.'
       },
       agent_deleted: {
         title: 'Destruction Complete',
@@ -686,7 +717,7 @@ export const translations = {
       },
       joined: {
         title: 'Competition Joined',
-        message: 'Agent entered Season 4 pool.'
+        message: 'Agent entered activity pool.'
       },
       prompt_saved: {
         title: 'Configuration Saved',
@@ -716,13 +747,13 @@ export const translations = {
       chat: 'Chat',
       edit_agent: 'Rebuild',
       delete_agent: 'Delete',
-      matrix: 'Skill Matrix',
+      matrix: 'my modules',
       module_count: 'Modules'
     },
     landing: {
       system_online: 'SYSTEM ONLINE',
       version: 'VERSION 4.0 // ARTISTIC REFORGE',
-      season_live: "SEASON 4: PHILOSOPHER'S STONE LIVE",
+      season_live: 'ACTIVITY LIVE',
       hero_title_1: 'FORGE YOUR',
       hero_title_2: 'ALPHA AGENT',
       hero_desc:
@@ -742,7 +773,7 @@ export const translations = {
           'Tick-level historical data, millisecond simulation matching, providing Sharpe ratio and max drawdown attribution.',
         community_title: 'Decentralized Think Tank',
         community_desc:
-          'Join the global ladder and compete against top Quant Agents. Share logic and earn season tokens.',
+          'Join the global ladder and compete against top Quant Agents. Share logic and earn activity rewards.',
         security_title: 'Zero Trust Architecture',
         security_desc:
           'All strategy code runs in a sandbox environment. User private data and core algorithms enjoy top-level encryption.'
@@ -757,7 +788,7 @@ export const translations = {
         privacy: 'Privacy Protocol',
         terms: 'Terms of Service'
       },
-      live_feed_tag: 'SEASON 4 // LIVE FEED',
+      live_feed_tag: 'LIVE FEED',
       total_return: 'Total Return',
       badge: {
         legend: 'LEGEND',
@@ -766,7 +797,7 @@ export const translations = {
       }
     },
     season_pass: {
-      title: 'SEASON PASS',
+      title: 'ACTIVITY PASS',
       season_pass_modal: {
         level_prefix: 'LV.',
         progress: '300 / 1000 XP',
@@ -779,12 +810,12 @@ export const translations = {
         activate: 'ACTIVATE PASS',
         view: 'VIEW ALL CHALLENGES'
       },
-      subtitle: "SEASON 4 // PHILOSOPHER'S STONE"
+      subtitle: 'ACTIVITY IN PROGRESS'
     },
     login: {
       welcome_title: 'Access Matrix Network',
       welcome_desc: 'Verify your neural link to synchronize strategy data.',
-      season_name: "SEASON 4: PHILOSOPHER'S STONE",
+      season_name: 'CURRENT ACTIVITY',
       tab_login: 'LOGIN',
       tab_register: 'REGISTER',
       connecting: 'CONNECTING...',
@@ -799,12 +830,11 @@ export const translations = {
       password_placeholder: '••••••••'
     },
     invite: {
-      season: 'S4 RECRUITMENT',
-      intro:
-        'Deploy your Agent to join Season 4 "Philosopher\'s Stone" ranked match and win the million prize pool.',
+      season: 'ACTIVITY',
+      intro: 'Deploy your Agent to join the current activity ranked match.',
       login_create: 'LOGIN & CREATE AGENT',
-      title: 'JOIN SEASON 4',
-      desc: 'Compete in ranked matches against 14,000+ agents network-wide.'
+      title: 'JOIN ACTIVITY',
+      desc: 'Compete in ranked matches against agents network-wide.'
     }
   }
 };

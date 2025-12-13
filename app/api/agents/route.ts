@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { apiUrl } from '@/lib/api';
 import { getAuthHeader } from '@/lib/serverAuth';
+import { backendURL, backendUrl } from '@/lib/serverBackend';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -12,16 +12,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: '缺少 user_id' }, { status: 400 });
   }
 
-  const target = apiUrl(
-    `/api/v1/agents?user_id=${encodeURIComponent(
-      userId
-    )}&skip=${encodeURIComponent(skip)}&limit=${encodeURIComponent(limit)}`
-  );
+  const targetUrl = backendURL('agents');
+  targetUrl.searchParams.set('user_id', userId);
+  targetUrl.searchParams.set('skip', skip);
+  targetUrl.searchParams.set('limit', limit);
 
   const auth = await getAuthHeader(req);
-  const res = await fetch(target, {
+  if (!auth) {
+    return NextResponse.json({ message: '未登录' }, { status: 401 });
+  }
+  const res = await fetch(targetUrl.toString(), {
     method: 'GET',
-    headers: auth ? { Authorization: auth } : undefined
+    headers: { Authorization: auth }
   });
   const text = await res.text();
 
@@ -46,7 +48,7 @@ export async function POST(req: Request) {
 
     const auth = await getAuthHeader(req);
 
-    const res = await fetch(apiUrl('/api/v1/agents'), {
+    const res = await fetch(backendUrl('agents'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

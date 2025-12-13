@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { apiUrl } from '@/lib/api';
 import { getAuthHeader } from '@/lib/serverAuth';
+import { backendUrl } from '@/lib/serverBackend';
 
 export async function POST(req: Request) {
   try {
@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
     const auth = await getAuthHeader(req);
 
-    const res = await fetch(apiUrl('/api/v1/on-demand/stock-analysis-v2'), {
+    const res = await fetch(backendUrl('/api/v1/on-demand/stock-analysis-v2'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ import type { NextResponse } from 'next/server';
 export const ACCESS_TOKEN_COOKIE = 'aa_access_token';
 
 export const getAuthHeader = async (req: Request) => {
+  debugger;
   const direct = req.headers.get('authorization');
   if (direct) return direct;
 

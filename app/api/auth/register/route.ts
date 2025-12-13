@@ -1,11 +1,5 @@
 import { NextResponse } from 'next/server';
-import { apiUrl } from '@/lib/api';
-
-const joinUrl = (base: string, path: string) => {
-  const trimmedBase = base.replace(/\/+$/, '');
-  const trimmedPath = path.replace(/^\/+/, '');
-  return `${trimmedBase}/${trimmedPath}`;
-};
+import { backendUrl } from '@/lib/serverBackend';
 
 export async function POST(req: Request) {
   try {
@@ -24,9 +18,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const target = process.env.API_PREFIX
-      ? joinUrl(process.env.API_PREFIX, 'auth/register')
-      : apiUrl('/api/v1/api/v2/auth/register');
+    const target = backendUrl('auth/register');
 
     const res = await fetch(target, {
       method: 'POST',

@@ -27,6 +27,13 @@ interface LandingPageProps {
   initialTopPerformers: TopPerformer[];
 }
 
+type StockActivity = {
+  id: number | string;
+  activity_name?: string;
+  status?: string;
+  index_sort?: number;
+};
+
 // Client-side translations
 const translations = {
   zh: {
@@ -34,7 +41,7 @@ const translations = {
     landing: {
       system_online: '系统在线',
       version: '版本 4.0 // 艺术重构',
-      season_live: 'S4 赛季: 贤者之石 进行中',
+      season_live: '活动进行中',
       hero_title_1: '铸造你的',
       hero_title_2: 'ALPHA AGENT',
       hero_desc:
@@ -44,7 +51,7 @@ const translations = {
       switch_identity: '切换身份',
       continue_as: '继续身份',
       top_performers: '表现最佳',
-      live_feed_tag: 'S4 实时信道',
+      live_feed_tag: '实时信道',
       enter: '进入系统',
       total_return: '累计收益',
       badge: { legend: '传说', whale: '巨鲸', bot: '智能体' },
@@ -57,7 +64,7 @@ const translations = {
           '基于 Tick 级历史数据，毫秒级仿真撮合，提供夏普比率、最大回撤等专业的绩效归因分析。',
         community_title: '去中心化智库',
         community_desc:
-          '加入全球排位赛，与顶尖的 Quant Agent 对抗。共享策略逻辑，获取赛季通证奖励。',
+          '加入全球排位赛，与顶尖的 Quant Agent 对抗。共享策略逻辑，获取活动奖励。',
         security_title: '零信任安全架构',
         security_desc:
           '所有策略代码均在沙箱环境中运行。用户的私有数据与核心算法享有最高级别的加密保护。'
@@ -79,11 +86,40 @@ export default function LandingPage({
   const { clearAgent } = useAgentStore();
   const [isClient, setIsClient] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [currentActivity, setCurrentActivity] = useState<StockActivity | null>(
+    null
+  );
 
   const t = translations.zh;
 
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch('/api/v2/stock-activities')
+      .then(async (res) => {
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        const list: StockActivity[] = Array.isArray(data) ? data : [];
+        const running = list
+          .filter((a) => a?.status === 'running')
+          .sort((a, b) => (b.index_sort ?? 0) - (a.index_sort ?? 0));
+        setCurrentActivity(running[0] ?? list[0] ?? null);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setCurrentActivity(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleEnter = () => {
@@ -96,6 +132,7 @@ export default function LandingPage({
 
   const isLoggedIn = isClient && currentUser !== null;
   const username = currentUser?.username;
+  const activityLabel = currentActivity?.activity_name || t.landing.season_live;
 
   return (
     <div className='relative w-full min-h-screen bg-cp-black text-cp-text overflow-y-auto custom-scrollbar flex flex-col font-sans tracking-[0.01em]'>
@@ -133,7 +170,7 @@ export default function LandingPage({
               {t.landing.version}
             </span>
             <span className='text-sm font-semibold text-cp-yellow animate-pulse tracking-[0.35em] uppercase'>
-              {t.landing.season_live}
+              {activityLabel}
             </span>
           </div>
         </div>
@@ -142,7 +179,7 @@ export default function LandingPage({
       {/* Hero Section */}
       <section className='relative z-10 flex flex-col items-center justify-center pt-24 pb-20 px-6 text-center'>
         <div className='mb-6 inline-flex items-center gap-2 px-5 py-1.5 rounded-full border border-cp-yellow/40 bg-cp-yellow/10 text-cp-yellow text-[11px] font-semibold uppercase tracking-[0.5em] animate-in fade-in slide-in-from-bottom-4 duration-700 shadow-[0_0_25px_rgba(209,180,106,0.25)]'>
-          <Trophy size={14} /> {t.landing.season_live}
+          <Trophy size={14} /> {activityLabel}
         </div>
 
         <h2 className='text-5xl md:text-8xl font-serif font-semibold tracking-tight text-cp-text mb-2 leading-tight animate-in fade-in slide-in-from-bottom-8 duration-1000'>

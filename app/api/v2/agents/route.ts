@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { apiUrl } from '@/lib/api';
 import { getAuthHeader } from '@/lib/serverAuth';
+import { backendUrl } from '@/lib/serverBackend';
 
 export async function POST(req: Request) {
   try {
@@ -19,9 +19,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const target = process.env.API_PREFIX
-      ? new URL('/api/v2/agents', process.env.API_PREFIX).toString()
-      : apiUrl('/api/v2/agents');
+    const target = backendUrl('/api/v2/agents');
 
     const auth = await getAuthHeader(req);
 

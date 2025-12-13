@@ -46,7 +46,7 @@ export default function ConfirmModal({
           </button>
           <button
             onClick={onConfirm}
-            className='px-6 py-2 bg-[#D4AF37] text-[#15171E] hover:bg-[#E0C341] font-bold font-oxanium uppercase text-sm transition-colors cp-clip-button'>
+            className='px-6 py-2 btn-gold font-bold font-oxanium uppercase text-sm transition-colors cp-clip-button'>
             <span className='flex items-center gap-2'>
               <Check size={16} /> {t('confirm_modal.execute')}
             </span>

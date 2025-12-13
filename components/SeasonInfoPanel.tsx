@@ -49,12 +49,28 @@ interface SeasonInfoPanelProps {
   onOpenPass?: () => void;
 }
 
+type StockActivity = {
+  id: number | string;
+  user_id?: number | string;
+  activity_name?: string;
+  activity_type?: string;
+  description?: string;
+  status?: string;
+  start_date?: string;
+  end_date?: string;
+  initial_capital?: string;
+  index_sort?: number;
+};
+
 export default function SeasonInfoPanel({
   agentName,
   isJoined = false,
   onOpenPass
 }: SeasonInfoPanelProps) {
   const { t, dictionary } = useLanguage();
+  const [activity, setActivity] = useState<StockActivity | null>(null);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityError, setActivityError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
     'SEASON' | 'LOGS' | 'ANALYSIS' | 'PICKING' | 'BACKTEST' | 'REPORT'
   >('SEASON');
@@ -79,6 +95,45 @@ export default function SeasonInfoPanel({
       .catch(console.error);
   }, []);
 
+  // Fetch current activity from API
+  useEffect(() => {
+    let aborted = false;
+    setActivityLoading(true);
+    setActivityError(null);
+
+    fetch('/api/v2/stock-activities')
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || t('activity_panel.fetch_failed'));
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (aborted) return;
+        const list: StockActivity[] = Array.isArray(data) ? data : [];
+        const running = list
+          .filter((a) => a?.status === 'running')
+          .sort((a, b) => (b.index_sort ?? 0) - (a.index_sort ?? 0));
+        setActivity((running[0] ?? list[0] ?? null) as StockActivity | null);
+      })
+      .catch((err) => {
+        if (aborted) return;
+        const message =
+          err instanceof Error ? err.message : t('activity_panel.fetch_failed');
+        setActivityError(message);
+        setActivity(null);
+      })
+      .finally(() => {
+        if (aborted) return;
+        setActivityLoading(false);
+      });
+
+    return () => {
+      aborted = true;
+    };
+  }, []);
+
   // Auto-switch tabs based on status
   useEffect(() => {
     if (isJoined) {
@@ -96,7 +151,7 @@ export default function SeasonInfoPanel({
         const newLogs = [
           {
             time: timeStr,
-            action: '正在扫描市场波动率...',
+            action: '正在扫描市场信号...',
             type: 'info' as const
           },
           {
@@ -149,7 +204,7 @@ export default function SeasonInfoPanel({
           className={`h-full type-eyebrow tab-item shrink-0 flex items-center gap-2 transition-colors ${
             activeTab === 'SEASON' ? 'active' : ''
           }`}>
-          <Crown size={12} /> 赛季概览
+          <Crown size={12} /> {t('activity_panel.tab_overview')}
         </button>
 
         {agentName && (
@@ -159,7 +214,7 @@ export default function SeasonInfoPanel({
               className={`h-full type-eyebrow tab-item shrink-0 flex items-center gap-2 transition-colors ${
                 activeTab === 'LOGS' ? 'active' : ''
               }`}>
-              <Terminal size={12} /> 运行日志
+              <Terminal size={12} /> {t('activity_panel.tab_logs')}
             </button>
             <button
               onClick={() => setActiveTab('ANALYSIS')}
@@ -208,14 +263,32 @@ export default function SeasonInfoPanel({
             <div className='flex flex-1 min-h-0'>
               {/* Stats - No vertical border unless needed */}
               <div className='w-1/3 p-6 flex flex-col justify-center items-center gap-3 text-center bg-transparent'>
-                <div className='type-eyebrow'>赛季奖池</div>
-                <div className='text-3xl font-bold text-cp-yellow type-figure'>
-                  ¥1.0M
+                <div className='type-eyebrow'>
+                  {t('activity_panel.current_activity')}
+                </div>
+                <div className='text-center'>
+                  <div className='text-lg font-bold text-white type-figure leading-tight'>
+                    {activity?.activity_name ||
+                      (activityLoading
+                        ? t('activity_panel.loading_dots')
+                        : t('activity_panel.empty'))}
+                  </div>
+                  <div className='mt-2 type-caption type-mono text-cp-text-muted'>
+                    {typeof activity?.index_sort === 'number'
+                      ? t('activity_panel.period').replace(
+                          '{n}',
+                          String(activity.index_sort)
+                        )
+                      : t('activity_panel.dash')}
+                  </div>
                 </div>
                 <div className='w-12 h-px bg-white/[0.1] my-2'></div>
-                <div className='type-eyebrow'>在线选手</div>
+                <div className='type-eyebrow'>{t('activity_panel.status')}</div>
                 <div className='text-xl font-bold text-white type-figure'>
-                  14,204
+                  {activity?.status ||
+                    (activityLoading
+                      ? t('activity_panel.loading')
+                      : t('activity_panel.unknown'))}
                 </div>
               </div>
 
@@ -223,25 +296,56 @@ export default function SeasonInfoPanel({
               <div className='flex-1 p-6 flex flex-col justify-center bg-transparent border-l border-white/[0.02]'>
                 <div className='flex justify-between items-center mb-4'>
                   <span className='font-bold text-lg text-cp-text type-serif-title'>
-                    下级奖励
+                    {t('activity_panel.activity_info')}
                   </span>
-                  <span className='text-cp-yellow type-caption border border-cp-yellow px-2 py-0.5'>
-                    LV.5
-                  </span>
+                  {activity?.activity_type && (
+                    <span className='text-cp-yellow type-caption border border-cp-yellow px-2 py-0.5'>
+                      {activity.activity_type}
+                    </span>
+                  )}
                 </div>
-                <div className='flex items-center gap-4 mb-6'>
-                  <div className='w-10 h-10 border border-white/[0.1] flex items-center justify-center text-cp-cyan bg-white/[0.02]'>
-                    <TrendingUp size={20} />
+
+                {activityError ? (
+                  <div className='text-xs text-cp-red font-sans leading-relaxed'>
+                    {activityError}
                   </div>
-                  <div className='text-xs text-cp-text-muted font-sans leading-relaxed'>
-                    解锁 Agent 策略的高级 Level-2 市场深度数据。
+                ) : (
+                  <div className='flex flex-col gap-3'>
+                    <div className='flex items-center gap-4'>
+                      <div className='w-10 h-10 border border-white/[0.1] flex items-center justify-center text-cp-cyan bg-white/[0.02]'>
+                        <TrendingUp size={20} />
+                      </div>
+                      <div className='text-xs text-cp-text-muted font-sans leading-relaxed'>
+                        {activity?.description || t('activity_panel.dash')}
+                      </div>
+                    </div>
+
+                    <div className='text-[11px] text-cp-text-muted font-mono tracking-widest'>
+                      {activity?.start_date && activity?.end_date
+                        ? t('activity_panel.date_range')
+                            .replace('{start}', activity.start_date)
+                            .replace('{end}', activity.end_date)
+                        : t('activity_panel.date_empty')}
+                    </div>
+                    <div className='text-[11px] text-cp-text-muted font-mono tracking-widest'>
+                      {activity?.initial_capital
+                        ? t('activity_panel.initial_capital').replace(
+                            '{amount}',
+                            activity.initial_capital
+                          )
+                        : t('activity_panel.initial_empty')}
+                    </div>
+
+                    {/* 暂时隐藏：活动奖励/活动通行证 */}
+                    {false && (
+                      <button
+                        onClick={onOpenPass}
+                        className='w-full py-3 glass-button flex items-center justify-center gap-2 text-xs font-bold text-cp-text-muted hover:text-white'>
+                        查看活动通行证 <ChevronRight size={14} />
+                      </button>
+                    )}
                   </div>
-                </div>
-                <button
-                  onClick={onOpenPass}
-                  className='w-full py-3 glass-button flex items-center justify-center gap-2 text-xs font-bold text-cp-text-muted hover:text-white'>
-                  查看赛季通行证 <ChevronRight size={14} />
-                </button>
+                )}
               </div>
             </div>
           </div>

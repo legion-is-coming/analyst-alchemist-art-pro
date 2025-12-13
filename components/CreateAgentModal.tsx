@@ -94,42 +94,42 @@ const PERSONA_PRESETS: Record<
   track_thinking: [
     {
       id: 'aggressive_growth',
-      title: 'aggressive_growth',
-      desc: '偏进攻：更关注高成长与赛道弹性。'
+      title: '赛道激进型',
+      desc: '追求高成长赛道，愿意承担高风险'
     },
     {
       id: 'conservative_value',
-      title: 'conservative_value',
-      desc: '偏防守：更关注稳健价值与风险控制。'
+      title: '稳健价值型',
+      desc: '偏好成熟赛道龙头，低估值高分红'
     },
     {
       id: 'dividend_focus',
-      title: 'dividend_focus',
-      desc: '偏红利：更关注股息率与稳定现金流。'
+      title: '红利收益型',
+      desc: '关注高股息赛道，追求稳定现金流'
     }
   ],
   quant_thinking: [
     {
       id: 'quantitative',
-      title: 'quantitative',
-      desc: '量化策略型：基于数据与模型，严格执行纪律。'
+      title: '量化策略型',
+      desc: '基于数据和模型，严格执行纪律'
     },
     {
       id: 'momentum_trader',
-      title: 'momentum_trader',
-      desc: '趋势动量型：追涨强势股，跟随市场热点。'
+      title: '趋势动量型',
+      desc: '追涨强势股，跟随市场热点'
     }
   ],
   news_thinking: [
     {
       id: 'contrarian',
-      title: 'contrarian',
-      desc: '逆向投资型：别人恐惧时贪婪，寻找被错杀机会。'
+      title: '逆向投资型',
+      desc: '别人恐惧时贪婪，寻找被错杀机会'
     },
     {
       id: 'balanced',
-      title: 'balanced',
-      desc: '均衡配置型：综合多个维度，分散配置。'
+      title: '均衡配置型',
+      desc: '综合考虑多个维度，分散配置'
     }
   ]
 };
@@ -153,14 +153,7 @@ export default function CreateAgentModal({
   onNotify
 }: CreateAgentModalProps) {
   const { currentUser } = useUserStore();
-  const {
-    agentName,
-    agentClass,
-    agentId,
-    setAgentId,
-    setAgentName,
-    setAgentClass
-  } = useAgentStore();
+  const { agentName, agentClass, agentId } = useAgentStore();
   const [step, setStep] = useState<CreationStep>('naming');
   const [name, setName] = useState('');
   const [selectedPresetId, setSelectedPresetId] = useState<WorkflowId | ''>('');
@@ -341,6 +334,11 @@ export default function CreateAgentModal({
       return;
     }
 
+    if (!selectedPreset) {
+      onNotify?.('创建失败', '无效的工作流选择。', 'error');
+      return;
+    }
+
     if (!currentUser) {
       onNotify?.('缺少用户信息', '请先登录以创建 Agent。', 'error');
       return;
@@ -372,7 +370,7 @@ export default function CreateAgentModal({
         createdId,
         name,
         customPrompt,
-        selectedPreset?.title ?? selectedPresetId,
+        selectedPreset.title,
         selectedPreset.stats,
         []
       );
@@ -453,11 +451,6 @@ export default function CreateAgentModal({
                   <span className='text-cp-yellow font-mono'>
                     {existingAgent.workflow_id}
                   </span>{' '}
-                  · 风险
-                  <span className='text-cp-yellow font-mono'>
-                    {' '}
-                    {existingAgent.risk_profile}
-                  </span>
                 </div>
               )}
             </div>
@@ -518,12 +511,8 @@ export default function CreateAgentModal({
             <div className='flex-1 flex flex-col p-8 animate-in fade-in slide-in-from-right-8 overflow-y-auto'>
               <div className='text-center mb-10'>
                 <h3 className='text-2xl font-serif font-bold text-white mb-2'>
-                  选择工作流（workflow_id）
+                  选择工作流
                 </h3>
-                <p className='text-cp-text-muted font-sans text-sm'>
-                  Step2 选择 workflow_id，Step3 将根据 workflow_id 提供
-                  persona_id。
-                </p>
               </div>
 
               <div className='grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto w-full mb-10'>
@@ -593,7 +582,7 @@ export default function CreateAgentModal({
               <div className='max-w-4xl mx-auto w-full flex flex-col gap-8 pb-20'>
                 {!selectedPresetId && (
                   <div className='p-6 border border-cp-border text-center text-cp-text-muted'>
-                    请先在上一步选择 workflow_id。
+                    请先在上一步选择工作流
                   </div>
                 )}
 
@@ -609,11 +598,7 @@ export default function CreateAgentModal({
                     </div>
 
                     <div className='space-y-3'>
-                      <div className='text-xs font-bold text-cp-text-muted uppercase tracking-widest'>
-                        选择 persona_id
-                      </div>
-
-                      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                      <div className='grid grid-cols-1 md:grid-cols-1 gap-4'>
                         {availablePersonas.map((p) => {
                           const isSelected = selectedPersonaId === p.id;
                           return (

@@ -1,9 +1,51 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Hexagon, Fingerprint, Power, Globe, X } from 'lucide-react';
 import { useLanguage } from '@/lib/useLanguage';
-import { login, register } from '@/lib/authApi';
+
+type StockActivity = {
+  id: number | string;
+  activity_name?: string;
+  status?: string;
+  index_sort?: number;
+};
+
+const parseMaybeJson = (text: string) => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
+
+const authRegister = async (payload: {
+  username: string;
+  email: string;
+  password: string;
+}) => {
+  const res = await fetch('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  const text = await res.text();
+  if (!res.ok) throw new Error(text || '请求失败');
+  return parseMaybeJson(text);
+};
+
+const authLogin = async (payload: { username: string; password: string }) => {
+  const res = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  const text = await res.text();
+  if (!res.ok) throw new Error(text || '请求失败');
+  return parseMaybeJson(text);
+};
 
 interface LoginScreenProps {
   onLogin: (user: { id?: string; username: string; email?: string }) => void;
@@ -17,6 +59,35 @@ export default function LoginScreen({ onLogin, onClose }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
+  const [currentActivity, setCurrentActivity] = useState<StockActivity | null>(
+    null
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch('/api/v2/stock-activities')
+      .then(async (res) => {
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        const list: StockActivity[] = Array.isArray(data) ? data : [];
+        const running = list
+          .filter((a) => a?.status === 'running')
+          .sort((a, b) => (b.index_sort ?? 0) - (a.index_sort ?? 0));
+        setCurrentActivity(running[0] ?? list[0] ?? null);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setCurrentActivity(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,16 +98,16 @@ export default function LoginScreen({ onLogin, onClose }: LoginScreenProps) {
 
     try {
       if (mode === 'register') {
-        await register({ username, email, password });
+        await authRegister({ username, email, password });
         // 注册成功后自动登录：再走一次登录接口以获得 token（由 Next 代理写入 HttpOnly cookie）
-        await login({ username, password });
+        await authLogin({ username, password });
 
         // UI 层仍沿用现有 onLogin 流程写入本地用户态
         onLogin({ username, email });
         return;
       }
 
-      const data = await login({ username, password });
+      const data = await authLogin({ username, password });
 
       const maybeId =
         data && typeof data === 'object'
@@ -89,7 +160,13 @@ export default function LoginScreen({ onLogin, onClose }: LoginScreenProps) {
                 {t('login.season_name')}
               </div>
               <div className='text-xs text-gray-500 font-mono'>
-                STATUS: <span className='text-white'>ONLINE</span>
+                {currentActivity?.activity_name || '—'}
+              </div>
+              <div className='text-xs text-gray-500 font-mono mt-2'>
+                STATUS:{' '}
+                <span className='text-white'>
+                  {(currentActivity?.status || '—').toUpperCase()}
+                </span>
               </div>
             </div>
           </div>

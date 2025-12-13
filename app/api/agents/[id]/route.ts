@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { apiUrl } from '@/lib/api';
 import { getAuthHeader } from '@/lib/serverAuth';
+import { backendUrl } from '@/lib/serverBackend';
 
 export async function DELETE(
   _req: NextRequest,
@@ -11,7 +11,7 @@ export async function DELETE(
     return NextResponse.json({ message: '缺少 agent id' }, { status: 400 });
   }
 
-  const target = apiUrl(`/api/v1/agents/${encodeURIComponent(id)}`);
+  const target = backendUrl(`/api/v1/agents/${encodeURIComponent(id)}`);
   const auth = await getAuthHeader(_req);
   const res = await fetch(target, {
     method: 'DELETE',

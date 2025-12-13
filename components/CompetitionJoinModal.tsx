@@ -4,20 +4,45 @@ import React from 'react';
 import { X, Trophy, Zap } from 'lucide-react';
 import { useLanguage } from '@/lib/useLanguage';
 
+type StockActivity = {
+  id: number | string;
+  activity_name?: string;
+  status?: string;
+  end_date?: string;
+  start_date?: string;
+  initial_capital?: string;
+  index_sort?: number;
+};
+
 interface CompetitionJoinModalProps {
   isOpen: boolean;
   onClose: () => void;
   onJoin: () => void;
+  activity?: StockActivity | null;
 }
 
 export default function CompetitionJoinModal({
   isOpen,
   onClose,
-  onJoin
+  onJoin,
+  activity
 }: CompetitionJoinModalProps) {
   const { dictionary } = useLanguage();
   if (!isOpen) return null;
   const copy = dictionary.competition_join;
+
+  const statusText =
+    (activity?.status &&
+      (dictionary as any)?.activity_panel?.status?.[activity.status]) ||
+    activity?.status ||
+    copy.participants_value;
+
+  const activityIndexText =
+    typeof activity?.index_sort === 'number'
+      ? `#${activity.index_sort}`
+      : copy.rank_value;
+
+  const endDateText = activity?.end_date || copy.ends_value;
 
   return (
     <div className='fixed inset-0 z-[150] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 modal-animate'>
@@ -37,7 +62,9 @@ export default function CompetitionJoinModal({
             {copy.title}
           </h2>
           <p className='text-cp-text-muted font-sans font-light text-lg mb-12 max-w-lg mx-auto'>
-            {copy.description}
+            {activity?.activity_name
+              ? `${copy.description} (${activity.activity_name})`
+              : copy.description}
           </p>
 
           <div className='grid grid-cols-3 gap-6 mb-12 border-t border-b border-white/[0.02] py-8'>
@@ -46,7 +73,7 @@ export default function CompetitionJoinModal({
                 {copy.rank_label}
               </div>
               <div className='text-2xl font-serif font-bold text-cp-yellow'>
-                {copy.rank_value}
+                {activityIndexText}
               </div>
             </div>
             <div className='flex flex-col items-center gap-2 border-l border-r border-white/[0.02] hover-card p-2 border-y-transparent'>
@@ -54,7 +81,7 @@ export default function CompetitionJoinModal({
                 {copy.participants_label}
               </div>
               <div className='text-2xl font-serif font-bold text-white'>
-                {copy.participants_value}
+                {statusText}
               </div>
             </div>
             <div className='flex flex-col items-center gap-2 hover-card p-2 border border-transparent'>
@@ -62,7 +89,7 @@ export default function CompetitionJoinModal({
                 {copy.ends_label}
               </div>
               <div className='text-2xl font-serif font-bold text-white'>
-                {copy.ends_value}
+                {endDateText}
               </div>
             </div>
           </div>
